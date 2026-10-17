@@ -1,7 +1,24 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { INITIAL_PRODUCTS, VOUCHERS } from '../data/mockData';
+import { useAuthStore } from '../store';
 
-export default function OnlineStore({ session, onLogout }) {
+// maVaiTro trong DB: ADMIN, NHAN_VIEN, KHACH_HANG
+const STAFF_ROLES = ['ADMIN', 'NHAN_VIEN'];
+
+export default function OnlineStore({ session: propSession, onLogout: propLogout }) {
+  const navigate = useNavigate();
+  const storeSession = useAuthStore((s) => s.session);
+  const storeLogout = useAuthStore((s) => s.logout);
+  const session = propSession || storeSession;
+  const isStaff = STAFF_ROLES.includes((session?.role || '').toUpperCase());
+
+  const handleLogout = () => {
+    if (typeof propLogout === 'function') propLogout();
+    storeLogout();
+    navigate('/login');
+  };
+
   const [activeTab, setActiveTab] = useState('home'); // 'home' | 'catalog' | 'customer'
   const [customerSubTab, setCustomerSubTab] = useState('orders'); // 'orders' | 'profile' | 'password'
 
@@ -239,15 +256,45 @@ export default function OnlineStore({ session, onLogout }) {
             placeholder="Tìm Jordan, Nike, size..."
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); if (activeTab !== 'catalog') setActiveTab('catalog'); }}
-            className="hidden sm:block w-52 bg-zinc-900 border border-zinc-700 text-xs px-3.5 py-1.5 rounded-full text-white focus:outline-none focus:border-[#c6f500]"
+            className="hidden sm:block w-48 bg-zinc-900 border border-zinc-700 text-xs px-3.5 py-1.5 rounded-full text-white focus:outline-none focus:border-[#c6f500]"
           />
 
-          <button onClick={() => setActiveTab('customer')} className="flex items-center space-x-1.5 p-2 rounded-xl hover:bg-zinc-900 text-xs font-bold text-zinc-200">
-            <div className="w-7 h-7 rounded-full bg-[#c6f500] text-black font-black text-xs flex items-center justify-center">
-              {session?.name ? session.name.charAt(0) : 'U'}
+          {/* Nút chuyển sang Admin POS nếu là tài khoản Quản trị / Thu ngân */}
+          {isStaff && (
+            <Link
+              to="/admin"
+              className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 hover:border-[#c6f500] text-xs font-bold text-[#c6f500] transition"
+              title="Mở Bàn Làm Việc Quản Trị & Thu Ngân POS"
+            >
+              <span>🛡️</span>
+              <span className="hidden md:inline">Quản Trị POS</span>
+            </Link>
+          )}
+
+          {session ? (
+            <div className="flex items-center space-x-2">
+              <button onClick={() => setActiveTab('customer')} className="flex items-center space-x-1.5 p-1.5 rounded-xl hover:bg-zinc-900 text-xs font-bold text-zinc-200">
+                <div className="w-7 h-7 rounded-full bg-[#c6f500] text-black font-black text-xs flex items-center justify-center">
+                  {session?.name ? session.name.charAt(0) : 'U'}
+                </div>
+                <span className="hidden lg:inline">{session?.name || 'Tài Khoản'}</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="text-zinc-400 hover:text-red-400 text-xs font-bold px-2 py-1 transition"
+                title="Đăng xuất khỏi tài khoản"
+              >
+                Đăng Xuất
+              </button>
             </div>
-            <span className="hidden lg:inline">{session?.name || 'Tài Khoản'}</span>
-          </button>
+          ) : (
+            <Link
+              to="/login"
+              className="px-3.5 py-1.5 rounded-xl bg-[#c6f500] text-black text-xs font-extrabold uppercase tracking-wide hover:bg-[#b0dc00] transition"
+            >
+              Đăng Nhập
+            </Link>
+          )}
 
           <button onClick={() => setIsCartOpen(true)} className="relative p-2.5 rounded-full bg-zinc-900 border border-zinc-700 hover:border-[#c6f500] text-zinc-200">
             🛒
@@ -454,7 +501,7 @@ export default function OnlineStore({ session, onLogout }) {
                   </div>
                 </div>
               </div>
-              <button onClick={onLogout} className="px-4 py-2 bg-zinc-900 hover:bg-red-500/20 hover:text-red-400 border border-zinc-700 text-xs font-bold rounded-xl transition">
+              <button onClick={handleLogout} className="px-4 py-2 bg-zinc-900 hover:bg-red-500/20 hover:text-red-400 border border-zinc-700 text-xs font-bold rounded-xl transition">
                 Đăng Xuất
               </button>
             </div>

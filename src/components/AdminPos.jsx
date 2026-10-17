@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS } from '../data/mockData';
+import { useAuthStore } from '../store';
 
-export default function AdminPos({ session, onLogout }) {
+export default function AdminPos({ session: propSession, onLogout: propLogout }) {
+  const navigate = useNavigate();
+  const storeSession = useAuthStore((s) => s.session);
+  const storeLogout = useAuthStore((s) => s.logout);
+  const session = propSession || storeSession;
+
+  const handleLogout = () => {
+    if (typeof propLogout === 'function') propLogout();
+    storeLogout();
+    navigate('/login');
+  };
+
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'pos' | 'products' | 'orders' | 'shift' | 'returns' | 'chat'
 
   // Dashboard Metrics & Filter State
@@ -100,9 +113,18 @@ export default function AdminPos({ session, onLogout }) {
         </div>
 
         <div className="flex items-center space-x-3 text-xs">
+          <Link
+            to="/"
+            className="hidden sm:flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-[#c6f500] text-zinc-300 hover:text-white font-bold transition"
+            title="Xem giao diện Cửa Hàng Online của Khách Hàng"
+          >
+            <span>🛍️</span>
+            <span>Cửa Hàng Online</span>
+          </Link>
+
           <div className="hidden sm:flex items-center space-x-2 text-zinc-300">
             <span className="w-2 h-2 rounded-full bg-[#c6f500] animate-pulse"></span>
-            <span>{session?.branch || 'Chi nhánh: 160 Phố Huế, Hoàn Kiếm'}</span>
+            <span>{session?.branch || 'Chi nhánh: 298 Cầu Giấy'}</span>
           </div>
 
           <div className="flex items-center space-x-1.5 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5 font-bold">
@@ -110,7 +132,7 @@ export default function AdminPos({ session, onLogout }) {
             <span className="text-white">{session?.name || 'Vũ Minh Đức (Admin)'}</span>
           </div>
 
-          <button onClick={onLogout} className="text-zinc-400 hover:text-red-400 font-bold transition">
+          <button onClick={handleLogout} className="text-zinc-400 hover:text-red-400 font-bold px-2 py-1 transition">
             Đăng Xuất
           </button>
         </div>

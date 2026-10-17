@@ -1,63 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLogin from './components/AuthLogin';
 import OnlineStore from './components/OnlineStore';
 import AdminPos from './components/AdminPos';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// maVaiTro trong DB: ADMIN, NHAN_VIEN, KHACH_HANG
+const STAFF_ROLES = ['ADMIN', 'NHAN_VIEN'];
 
 export default function App() {
-  const [session, setSession] = useState(null);
-  const [currentView, setCurrentView] = useState('auth'); // 'auth' | 'online' | 'admin'
-
-  // Load session from localStorage on initial render
-  useEffect(() => {
-    const saved = localStorage.getItem('vibeflow_session');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setSession(parsed);
-        if (parsed.role === 'ADMIN' || parsed.role === 'CASHIER') {
-          setCurrentView('admin');
-        } else {
-          setCurrentView('online');
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
-
-  const handleLoginSuccess = (userSession) => {
-    setSession(userSession);
-    if (userSession.role === 'ADMIN' || userSession.role === 'CASHIER') {
-      setCurrentView('admin');
-    } else {
-      setCurrentView('online');
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('vibeflow_session');
-    setSession(null);
-    setCurrentView('auth');
-  };
-
-  if (currentView === 'auth' || !session) {
-    return <AuthLogin onLoginSuccess={handleLoginSuccess} />;
-  }
-
-  if (currentView === 'admin') {
-    return (
-      <AdminPos
-        session={session}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
   return (
-    <OnlineStore
-      session={session}
-      onLogout={handleLogout}
-    />
+    <BrowserRouter>
+      <Routes>
+        {/* Trang đăng nhập */}
+        <Route path="/login" element={<AuthLogin />} />
+
+        {/* Trang khách hàng — online store */}
+        <Route path="/" element={<OnlineStore />} />
+        <Route path="/online" element={<Navigate to="/" replace />} />
+
+        {/* Trang nhân viên / quản trị — yêu cầu role nhân viên */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={STAFF_ROLES}>
+              <AdminPos />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
