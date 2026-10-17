@@ -8,59 +8,58 @@ import {
 } from '../api/authStorage';
 
 /**
- * Zustand Store quản lý trạng thái xác thực toàn cục cho VibeFlow
+ * Zustand Store quản lý xác thực toàn cục — có persist vào localStorage.
+ *
+ * Lưu ý Zustand v5: persist hydrate bất đồng bộ.
+ * Dùng `_hasHydrated` để ProtectedRoute biết khi nào đã đọc xong localStorage,
+ * tránh redirect nhầm về /login khi F5.
  */
 export const useAuthStore = create(
   persist(
     (set, get) => ({
-      session: getCurrentSession(),
-      loading: false,
+      session: null,        // sẽ được restore từ localStorage sau khi hydrate
+      _hasHydrated: false,  // cờ báo persist đã đọc xong localStorage
 
-      // Hàm đăng nhập: Lưu session vào state và đồng bộ localStorage
+      // Được gọi tự động bởi onRehydrateStorage bên dưới
+      setHasHydrated: (val) => set({ _hasHydrated: val }),
+
+      // Đăng nhập: lưu session vào state + localStorage
       login: (sessionData) => {
         setAuthSession(sessionData);
         set({ session: sessionData });
       },
 
-      // Hàm đăng xuất: Dọn dẹp session và tokens
+      // Đăng xuất: xóa session
       logout: () => {
         clearAuthSession();
         set({ session: null });
       },
 
-      // Cập nhật access token mới khi refresh token thành công
+      // Cập nhật access token mới sau khi refresh thành công
       setAccessToken: (newAccessToken) => {
         updateStorageToken(newAccessToken);
         const currentSession = get().session;
         if (currentSession) {
-          set({
-            session: {
-              ...currentSession,
-              accessToken: newAccessToken,
-            },
-          });
+          set({ session: { ...currentSession, accessToken: newAccessToken } });
         }
       },
-
-      // Getters / Helper flags
-      isAuthenticated: () => !!get().session,
-      isAdmin: () => get().session?.role === 'ADMIN',
-      isCashier: () => get().session?.role === 'CASHIER',
-      isStaff: () => {
-        const role = get().session?.role;
-        return role === 'ADMIN' || role === 'CASHIER';
-      },
-      isCustomer: () => get().session?.role === 'KHACH_HANG' || get().session?.role === 'CUSTOMER',
     }),
     {
-      name: 'vibeflow_session', // Khớp với key localStorage hiện tại
+      name: 'vibeflow_session',
       storage: createJSONStorage(() => localStorage),
+      // Chỉ persist session, không persist _hasHydrated
       partialize: (state) => ({ session: state.session }),
+      onRehydrateStorage: () => (state) => {
+        // Được gọi sau khi persist đọc xong localStorage
+        if (state) {
+          state.setHasHydrated(true);
+        }
+      },
     }
   )
 );
 
-// Lắng nghe sự kiện token hết hạn từ axiosClient để tự động dọn dẹp state
+// Lắng nghe sự kiện token hết hạn từ axiosClient
 if (typeof window !== 'undefined') {
   window.addEventListener('vibeflow:auth-expired', () => {
     useAuthStore.getState().logout();

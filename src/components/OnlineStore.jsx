@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { INITIAL_PRODUCTS, VOUCHERS } from '../data/mockData';
 import { useAuthStore } from '../store';
@@ -7,11 +7,20 @@ import { useAuthStore } from '../store';
 const STAFF_ROLES = ['ADMIN', 'NHAN_VIEN'];
 
 export default function OnlineStore({ session: propSession, onLogout: propLogout }) {
-  const navigate = useNavigate();
+  const navigate     = useNavigate();
   const storeSession = useAuthStore((s) => s.session);
-  const storeLogout = useAuthStore((s) => s.logout);
-  const session = propSession || storeSession;
-  const isStaff = STAFF_ROLES.includes((session?.role || '').toUpperCase());
+  const hasHydrated  = useAuthStore((s) => s._hasHydrated);
+  const storeLogout  = useAuthStore((s) => s.logout);
+  const session      = propSession || storeSession;
+  const isStaff      = STAFF_ROLES.includes((session?.role || '').toUpperCase());
+
+  // Nếu đã đăng nhập là nhân viên/admin → redirect thẳng về /admin
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (session && STAFF_ROLES.includes((session.role || '').toUpperCase())) {
+      navigate('/admin', { replace: true });
+    }
+  }, [hasHydrated, session, navigate]);
 
   const handleLogout = () => {
     if (typeof propLogout === 'function') propLogout();
