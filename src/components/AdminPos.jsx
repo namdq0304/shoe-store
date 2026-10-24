@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { INITIAL_PRODUCTS, INITIAL_ORDERS } from '../data/mockData';
 import { useAuthStore } from '../store';
+import { sanPhamApi } from '../api';
+import ProductDetail from './ProductDetail';
+import AdminProduct from "./AdminProduct.jsx";
 
 export default function AdminPos({ session: propSession, onLogout: propLogout }) {
   const navigate = useNavigate();
@@ -601,53 +604,9 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
             </div>
           )}
 
-          {/* TAB 2: PRODUCTS MATRIX */}
-          {activeTab === 'products' && (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="font-black text-sm uppercase text-white">Quản Lý Danh Mục Sản Phẩm</h3>
-                <button onClick={() => alert("Thêm sản phẩm mới")} className="px-3.5 py-2 bg-[#c6f500] text-black text-xs font-bold rounded-xl">
-                  + Thêm Sản Phẩm Mới
-                </button>
-              </div>
+          {/* TAB 2: PRODUCTS */}
+          {activeTab === 'products' && (<AdminProduct activeTab={activeTab} isAdmin={isAdmin}/>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {INITIAL_PRODUCTS.map((p) => (
-                  <div key={p.id} className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition group">
-                    <div className="relative">
-                      <img src={p.image} className="w-full aspect-[4/3] object-cover bg-zinc-900" alt={p.name} />
-                      {p.isFlashSale && (
-                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-lg">Flash Sale</span>
-                      )}
-                      <span className="absolute top-2 right-2 px-2 py-0.5 bg-zinc-900/90 text-zinc-300 text-[10px] font-mono rounded-lg">{p.sku}</span>
-                    </div>
-                    <div className="p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase text-zinc-500">{p.brand}</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${p.stock > 20 ? 'bg-[#c6f500]/15 text-[#c6f500]' : p.stock > 10 ? 'bg-amber-400/15 text-amber-400' : 'bg-red-400/15 text-red-400'}`}>
-                          Tồn: {p.stock} đôi
-                        </span>
-                      </div>
-                      <h4 className="font-bold text-sm text-white line-clamp-2">{p.name}</h4>
-                      <div className="flex items-center justify-between pt-1">
-                        <div>
-                          <span className="font-black text-[#c6f500] text-sm">{p.price.toLocaleString('vi-VN')}₫</span>
-                          {p.originalPrice > p.price && (
-                            <span className="text-[10px] text-zinc-500 line-through ml-1.5">{p.originalPrice.toLocaleString('vi-VN')}₫</span>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-zinc-500">Vốn: {p.cost.toLocaleString('vi-VN')}₫</span>
-                      </div>
-                      <div className="text-[10px] text-zinc-500">NCC: {p.supplier}</div>
-                      <div className="flex gap-1.5 pt-1">
-                        <button onClick={() => alert('Sửa sản phẩm: ' + p.name)} className="flex-1 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-[10px] font-bold rounded-lg transition">✏️ Sửa</button>
-                        <button onClick={() => alert('Xóa sản phẩm: ' + p.name)} className="py-1.5 px-3 bg-zinc-900 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 text-[10px] font-bold rounded-lg transition">🗑️</button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           )}
 
           {/* TAB 3: ORDERS MANAGEMENT */}

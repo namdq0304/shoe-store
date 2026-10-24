@@ -59,7 +59,8 @@ export const useAuthStore = create(
   )
 );
 
-// Lắng nghe sự kiện token hết hạn từ axiosClient
+// Lắng nghe sự kiện token hết hạn từ axiosClient → chỉ cần xóa state Zustand
+// (redirect đã được xử lý bởi axiosClient dùng window.location)
 if (typeof window !== 'undefined') {
   window.addEventListener('vibeflow:auth-expired', () => {
     useAuthStore.getState().logout();

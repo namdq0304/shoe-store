@@ -6,41 +6,38 @@ import {
   clearAuthSession
 } from './authStorage';
 
-/**
- * Base URL cấu hình linh hoạt:
- * - Ưu tiên biến môi trường VITE_API_BASE_URL (nếu có trong .env)
- * - Mặc định dùng '/api' để khớp với server.servlet.context-path=/api của Spring Boot
- *   và hoạt động thông qua proxy của Vite (tránh lỗi CORS)
- */
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const axiosClient = axios.create({
   baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
 });
 
-// Biến quản lý trạng thái Refresh Token để tránh spam API refresh khi có nhiều request đồng thời
 let isRefreshing = false;
-let failedQueue = [];
+let failedQueue  = [];
 
 const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
+  failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(token)));
   failedQueue = [];
 };
 
 /**
- * Request Interceptor:
- * Tự động gắn Bearer Token vào Header Authorization của mỗi request nếu đã có token
+ * Xóa session + redirect về trang đăng nhập.
+ * Dùng window.location vì axiosClient nằm ngoài React.
  */
+const forceLogout = () => {
+  clearAuthSession();
+  if (typeof window !== 'undefined') {
+    // Thông báo để Zustand store xóa state
+    window.dispatchEvent(new CustomEvent('vibeflow:auth-expired'));
+    // Redirect đúng cổng đăng nhập
+    const isAdminPath = window.location.pathname.startsWith('/admin');
+    window.location.href = isAdminPath ? '/admin/login' : '/login';
+  }
+};
+
+// ── Request Interceptor: gắn Bearer token ─────────────────────────────────────
 axiosClient.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
@@ -49,66 +46,58 @@ axiosClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-/**
- * Response Interceptor:
- * - Trả về dữ liệu `response.data` trực tiếp cho component
- * - Tự động bắt lỗi 401 để refresh token và gọi lại request ban đầu
- * - Chuẩn hóa định dạng lỗi để dễ dàng bắt lỗi và hiển thị thông báo
- */
+// ── Response Interceptor ───────────────────────────────────────────────────────
 axiosClient.interceptors.response.use(
-  (response) => {
-    // Trả về thẳng phần data từ server
-    return response.data;
-  },
+  (response) => response.data,
+
   async (error) => {
     const originalRequest = error.config;
 
-    // Trường hợp lỗi mạng, server sập hoặc không phản hồi
+    // Lỗi mạng / server không phản hồi
     if (!error.response) {
       return Promise.reject({
         success: false,
         status: 0,
-        message: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc đảm bảo backend Spring Boot đang chạy!',
+        message: 'Không thể kết nối đến máy chủ. Hãy kiểm tra backend đang chạy!',
         originalError: error,
       });
     }
 
-    const { status, data } = error.response;
-    const requestUrl = originalRequest?.url || '';
+    const { status } = error.response;
+    const requestUrl  = originalRequest?.url || '';
 
-    // Các API không kích hoạt cơ chế tự động refresh token
-    const isAuthEndpoint =
-      requestUrl.includes('/auth/login') ||
-      requestUrl.includes('/auth/admin/login') ||
-      requestUrl.includes('/auth/customer/login') ||
-      requestUrl.includes('/auth/refresh') ||
-      requestUrl.includes('/auth/customer/register');
+    // Các endpoint auth không kích hoạt refresh (tránh loop vô hạn)
+    const isAuthEndpoint = [
+      '/auth/login', '/auth/admin/login', '/auth/customer/login',
+      '/auth/refresh', '/auth/customer/register',
+    ].some((u) => requestUrl.includes(u));
 
-    // Xử lý khi Token hết hạn (401 Unauthorized) trên các request cần xác thực
-    if (status === 401 && !isAuthEndpoint && !originalRequest._retry) {
+    // ── 401 và 403: thử refresh token ─────────────────────────────────────────
+    // Backend cũ (chưa fix) trả 403 thay vì 401 khi token hết hạn
+    // → xử lý cả 2 để tương thích
+    const needsRefresh = (status === 401 || status === 403)
+      && !isAuthEndpoint
+      && !originalRequest._retry;
+
+    if (needsRefresh) {
       const refreshToken = getRefreshToken();
 
-      // Nếu không có Refresh Token để tái cấp, dọn phiên đăng nhập
+      // Không có refresh token → logout ngay
       if (!refreshToken) {
-        clearAuthSession();
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('vibeflow:auth-expired'));
-        }
+        forceLogout();
         return Promise.reject(formatError(error));
       }
 
-      // Nếu đang trong quá trình refresh từ 1 request trước đó, đưa request này vào hàng đợi
+      // Đang có request khác refresh → đưa vào queue chờ
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+          .then((newToken) => {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
             return axiosClient(originalRequest);
           })
           .catch((err) => Promise.reject(err));
@@ -118,45 +107,27 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Gọi API refresh token dựa trên AuthController: POST /auth/refresh?refreshToken=...
-        // Sử dụng instance axios riêng biệt để không đi qua interceptor này
-        const refreshResponse = await axios.post(
+        // Gọi refresh bằng axios thường (không qua interceptor)
+        const refreshRes = await axios.post(
           `${BASE_URL}/auth/refresh`,
           null,
-          {
-            params: { refreshToken },
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 10000,
-          }
+          { params: { refreshToken }, timeout: 10000 }
         );
 
-        const newAccessToken = refreshResponse.data?.accessToken;
+        const newToken = refreshRes.data?.accessToken;
+        if (!newToken) throw new Error('Server không trả về access token mới');
 
-        if (newAccessToken) {
-          // Lưu token mới vào localStorage
-          updateAccessToken(newAccessToken);
+        // Lưu token mới, retry tất cả request đang chờ
+        updateAccessToken(newToken);
+        processQueue(null, newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return axiosClient(originalRequest);
 
-          // Giải phóng hàng đợi
-          processQueue(null, newAccessToken);
-
-          // Cập nhật header cho request hiện tại và thực hiện lại
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return axiosClient(originalRequest);
-        } else {
-          throw new Error('Máy chủ không trả về accessToken mới!');
-        }
-      } catch (refreshErr) {
-        processQueue(refreshErr, null);
-        clearAuthSession();
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('vibeflow:auth-expired'));
-        }
-        return Promise.reject({
-          success: false,
-          status: 401,
-          message: 'Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại!',
-          originalError: refreshErr,
-        });
+      } catch {
+        // Refresh thất bại (refresh token hết hạn) → logout
+        processQueue(new Error('Refresh failed'), null);
+        forceLogout();
+        return Promise.reject(formatError(error));
       } finally {
         isRefreshing = false;
       }
@@ -166,29 +137,14 @@ axiosClient.interceptors.response.use(
   }
 );
 
-/**
- * Hàm chuẩn hóa định dạng lỗi trả về từ Spring Boot AuthController
- */
 function formatError(error) {
   const status = error.response?.status || 500;
-  const data = error.response?.data;
-
-  let message = 'Đã có lỗi xảy ra trong quá trình xử lý!';
-  if (typeof data === 'string') {
-    message = data;
-  } else if (data?.message) {
-    message = data.message;
-  } else if (error.message) {
-    message = error.message;
-  }
-
-  return {
-    success: false,
-    status,
-    message,
-    data,
-    originalError: error,
-  };
+  const data   = error.response?.data;
+  let message  = 'Đã có lỗi xảy ra!';
+  if (typeof data === 'string' && data.length < 300) message = data;
+  else if (data?.message) message = data.message;
+  else if (error.message)  message = error.message;
+  return { success: false, status, message, data, originalError: error };
 }
 
 export default axiosClient;
