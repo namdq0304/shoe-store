@@ -62,9 +62,10 @@ export default function AdminLogin() {
         tenVaiTro:   res.tenVaiTro,
       };
 
+      // useEffect phía trên tự chuyển sang /admin khi session có giá trị — không điều hướng lần 2 ở đây
+      // (setTimeout cũ kéo người dùng về /admin nếu họ bấm menu trong 400ms đầu)
       login(sessionData);
       setSuccessMessage(`Chào ${sessionData.name}! Đang vào hệ thống...`);
-      setTimeout(() => navigate('/admin', { replace: true }), 400);
     } catch (err) {
       setErrorMessage(err.message || 'Đăng nhập thất bại! Kiểm tra email / mật khẩu.');
     } finally {
