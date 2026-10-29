@@ -6,6 +6,8 @@ import { sanPhamApi } from '../api';
 import ProductDetail from './ProductDetail';
 import AdminProduct from "./AdminProduct.jsx";
 import AdminAttribute from "./AdminAttribute.jsx";
+import KhachHangPage from "./KhachHangPage.jsx";
+import NhanVienPage from "./NhanVienPage.jsx";
 
 export default function AdminPos({ session: propSession, onLogout: propLogout }) {
   const navigate = useNavigate();
@@ -197,6 +199,25 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
             >
               <span>🏷️</span>
               <span>Quản Lý Thuộc tính</span>
+            </button>
+            <button
+                onClick={() => setActiveTab('customer')}
+                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition ${
+                    activeTab === 'customer' ? 'bg-[#c6f500] text-black shadow' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+            >
+              <span>👥</span>
+              <span>Quản Lý Khách Hàng</span>
+            </button>
+
+            <button
+                onClick={() => setActiveTab('employee')}
+                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition ${
+                    activeTab === 'employee' ? 'bg-[#c6f500] text-black shadow' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+            >
+              <span>🧑‍💼</span>
+              <span>Quản Lý Nhân Viên</span>
             </button>
             <button
               onClick={() => setActiveTab('shift')}
@@ -620,6 +641,8 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
           )}
           {activeTab === 'attribute' && (<AdminAttribute activeTab={activeTab} isAdmin={isAdmin}/>
           )}
+          {activeTab === 'customer' && <KhachHangPage isAdmin={isAdmin} />}
+          {activeTab === 'employee' && <NhanVienPage isAdmin={isAdmin} />}
 
           {/* TAB 3: ORDERS MANAGEMENT */}
           {activeTab === 'orders' && (
