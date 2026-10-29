@@ -12,27 +12,27 @@ export const khachHangApi = {
    * @returns {Promise<{ content: Array, page: number, size: number, totalElements: number, totalPages: number }>}
    */
   search(params) {
-    return axiosClient.get('/admin/khach-hang', { params });
+    return axiosClient.get('/khach-hang', { params });
   },
 
   /** KPI: { tong, hoatDong, daKhoa, moiTrongThang } */
   thongKe() {
-    return axiosClient.get('/admin/khach-hang/thong-ke');
+    return axiosClient.get('/khach-hang/thong-ke');
   },
 
   /** Thêm khách hàng — mật khẩu mặc định "1" do BE đặt */
   create(data) {
-    return axiosClient.post('/admin/khach-hang', data);
+    return axiosClient.post('/khach-hang', data);
   },
 
   /** Cập nhật thông tin — không đổi trạng thái */
   update(id, data) {
-    return axiosClient.put(`/admin/khach-hang/${id}`, data);
+    return axiosClient.put(`/khach-hang/${id}`, data);
   },
 
   /** Khóa / mở khóa — chỉ ADMIN */
   updateTrangThai(id, trangThai) {
-    return axiosClient.patch(`/admin/khach-hang/${id}/trang-thai`, { trangThai });
+    return axiosClient.patch(`/khach-hang/${id}/trang-thai`, { trangThai });
   },
 };
 

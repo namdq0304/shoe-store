@@ -11,35 +11,35 @@ export const nhanVienApi = {
    * @param {{ q?: string, vaiTroId?: number, trangThai?: boolean, page?: number, size?: number }} params
    */
   search(params) {
-    return axiosClient.get('/admin/nhan-vien', { params });
+    return axiosClient.get('/nhan-vien', { params });
   },
 
   /** KPI: { tong, hoatDong, daKhoa, quanTriVien } */
   thongKe() {
-    return axiosClient.get('/admin/nhan-vien/thong-ke');
+    return axiosClient.get('/nhan-vien/thong-ke');
   },
 
   /** Vai trò gán được cho nhân viên (không có KHACH_HANG): [{ id, maVaiTro, tenVaiTro }] */
   vaiTro() {
-    return axiosClient.get('/admin/vai-tro');
+    return axiosClient.get('/nhan-vien/vai-tro');
   },
 
   /** Thêm nhân viên — mật khẩu mặc định "1" do BE đặt */
   create(data) {
-    return axiosClient.post('/admin/nhan-vien', data);
+    return axiosClient.post('/nhan-vien', data);
   },
 
   update(id, data) {
-    return axiosClient.put(`/admin/nhan-vien/${id}`, data);
+    return axiosClient.put(`/nhan-vien/${id}`, data);
   },
 
   updateTrangThai(id, trangThai) {
-    return axiosClient.patch(`/admin/nhan-vien/${id}/trang-thai`, { trangThai });
+    return axiosClient.patch(`/nhan-vien/${id}/trang-thai`, { trangThai });
   },
 
   /** Đặt lại mật khẩu về "1" */
   resetMatKhau(id) {
-    return axiosClient.post(`/admin/nhan-vien/${id}/reset-mat-khau`);
+    return axiosClient.post(`/nhan-vien/${id}/reset-mat-khau`);
   },
 };
 
