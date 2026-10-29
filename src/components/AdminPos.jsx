@@ -5,6 +5,7 @@ import { useAuthStore } from '../store';
 import { sanPhamApi } from '../api';
 import ProductDetail from './ProductDetail';
 import AdminProduct from "./AdminProduct.jsx";
+import AdminAttribute from "./AdminAttribute.jsx";
 
 export default function AdminPos({ session: propSession, onLogout: propLogout }) {
   const navigate = useNavigate();
@@ -187,6 +188,15 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
             >
               <span>📋</span>
               <span>Quản Lý Hóa Đơn</span>
+            </button>
+            <button
+                onClick={() => setActiveTab('attribute')}
+                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition ${
+                    activeTab === 'attribute' ? 'bg-[#c6f500] text-black shadow' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+            >
+              <span>🏷️</span>
+              <span>Quản Lý Thuộc tính</span>
             </button>
             <button
               onClick={() => setActiveTab('shift')}
@@ -607,6 +617,8 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
           {/* TAB 2: PRODUCTS */}
           {activeTab === 'products' && (<AdminProduct activeTab={activeTab} isAdmin={isAdmin}/>
 
+          )}
+          {activeTab === 'attribute' && (<AdminAttribute activeTab={activeTab} isAdmin={isAdmin}/>
           )}
 
           {/* TAB 3: ORDERS MANAGEMENT */}

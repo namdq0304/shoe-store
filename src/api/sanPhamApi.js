@@ -22,6 +22,8 @@ export const sanPhamApi = {
 
   // Xóa mềm — chỉ ADMIN
   delete: (id) => axiosClient.delete(`/san-pham/${id}`),
+  updateStatus: (id, trangThai) =>
+      axiosClient.patch(`/san-pham/${id}/trang-thai`, { trangThai }),
 };
 
 export default sanPhamApi;

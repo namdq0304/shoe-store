@@ -40,6 +40,25 @@ export default function AdminProduct({ isAdmin }) {
     const [danhMucs, setDanhMucs] = useState([]);
     const [xuatXus, setXuatXus] = useState([]);
 
+    const [togglingId, setTogglingId] = useState(null);
+
+    const handleToggleStatus = async (p) => {
+        if (togglingId) return;
+        const next = !p.trangThai;
+        setTogglingId(p.id);
+
+        // Cập nhật giao diện ngay, lỗi thì hoàn lại
+        setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, trangThai: next } : x)));
+        try {
+            await sanPhamApi.updateStatus(p.id, next);
+        } catch (err) {
+            setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, trangThai: !next } : x)));
+            setProdError(err.response?.data?.message || err.message || 'Đổi trạng thái thất bại!');
+        } finally {
+            setTogglingId(null);
+        }
+    };
+
     // ── Modal: null | 'view' | 'add' | 'edit' | 'delete' ───────────────────
     const [prodModal, setProdModal] = useState(null);
     const [selectedProd, setSelectedProd] = useState(null);
@@ -315,9 +334,15 @@ export default function AdminProduct({ isAdmin }) {
 
                                     {/* Trạng thái */}
                                     <td className="px-4 py-3 text-center">
-                                            <span className="px-2 py-0.5 rounded-lg bg-zinc-800 text-zinc-400 font-bold text-[10px]">
-                                                Đang bán
-                                            </span>
+                                        <button
+                                            onClick={() => handleToggleStatus(p)}
+                                            disabled={togglingId === p.id}
+                                            className={`relative w-10 h-5 rounded-full transition ${p.trangThai ? 'bg-[#c6f500]' : 'bg-zinc-700'}`}
+                                        >
+    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-black transition-transform ${
+        p.trangThai ? 'translate-x-5' : ''
+    }`} />
+                                        </button>
                                     </td>
 
                                     {/* Hành động */}
@@ -337,14 +362,14 @@ export default function AdminProduct({ isAdmin }) {
                                                     ✏️ Sửa
                                                 </button>
                                             )}
-                                            {isAdmin && (
-                                                <button
-                                                    onClick={() => openDelete(p)}
-                                                    className="px-2.5 py-1.5 bg-zinc-900 hover:bg-red-500/10 border border-zinc-700 hover:border-red-500/40 text-zinc-500 hover:text-red-400 text-[10px] font-bold rounded-lg transition"
-                                                >
-                                                    🗑️
-                                                </button>
-                                            )}
+                                            {/*{isAdmin && (*/}
+                                            {/*    <button*/}
+                                            {/*        onClick={() => openDelete(p)}*/}
+                                            {/*        className="px-2.5 py-1.5 bg-zinc-900 hover:bg-red-500/10 border border-zinc-700 hover:border-red-500/40 text-zinc-500 hover:text-red-400 text-[10px] font-bold rounded-lg transition"*/}
+                                            {/*    >*/}
+                                            {/*        🗑️*/}
+                                            {/*    </button>*/}
+                                            {/*)}*/}
                                         </div>
                                     </td>
                                 </tr>
