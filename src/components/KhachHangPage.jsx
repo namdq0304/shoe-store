@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/index.js';
 import {
   ConfirmDialog, Field, GhostButton, Icon, IconButton, KpiCard, Modal, PageHeader, Pagination, PrimaryButton,
-  SelectInput, StatusBadge, Switch, TableStateRow, TextInput, Toast, percent, useDebounced, usePagedList, useToast,
+  SelectInput, Switch, TableStateRow, TextInput, Toast, percent, useDebounced, usePagedList, useToast,
 } from './admin/ui.jsx';
 import khachHangApi from "../api/khachHangApi.js";
 
@@ -201,7 +201,7 @@ export default function KhachHangPage() {
                 <th scope="col" className="px-4 py-3 font-semibold">Email</th>
                 <th scope="col" className="px-4 py-3 font-semibold">Ngày sinh</th>
                 <th scope="col" className="px-4 py-3 font-semibold">Giới tính</th>
-                <th scope="col" className="px-4 py-3 font-semibold">Trạng thái</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-center">Trạng thái</th>
                 <th scope="col" className="px-4 py-3 font-semibold text-right">Thao tác</th>
               </tr>
             </thead>
@@ -218,16 +218,17 @@ export default function KhachHangPage() {
                   <td className="px-4 py-3">{kh.email || '—'}</td>
                   <td className="px-4 py-3 font-mono">{formatDate(kh.ngaySinh)}</td>
                   <td className="px-4 py-3">{formatGioiTinh(kh.gioiTinh)}</td>
-                  <td className="px-4 py-3"><StatusBadge active={kh.trangThai} /></td>
+                  <td className="px-4 py-3">
+                    {/* ADR-002: chỉ ADMIN được khóa / mở khóa — role khác thấy switch ở trạng thái disabled */}
+                    <div className="flex justify-center">
+                      <Switch checked={kh.trangThai} disabled={!isAdmin} onChange={() => setConfirm(kh)}
+                        label={`${kh.trangThai ? 'Khóa' : 'Mở khóa'} tài khoản ${kh.maKhachHang} – ${kh.hoTen}`}
+                        title={isAdmin ? undefined : (kh.trangThai ? 'Hoạt động' : 'Đã khóa')} />
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
                       <IconButton icon="pencil" label={`Sửa khách hàng ${kh.maKhachHang} – ${kh.hoTen}`} onClick={() => openEdit(kh)} />
-                      {/* ADR-002: chỉ ADMIN thấy nút khóa / mở khóa */}
-                      {isAdmin && (
-                        <IconButton icon={kh.trangThai ? 'lock' : 'unlock'} tone={kh.trangThai ? 'default' : 'danger'}
-                          label={`${kh.trangThai ? 'Khóa' : 'Mở khóa'} tài khoản ${kh.maKhachHang} – ${kh.hoTen}`}
-                          onClick={() => setConfirm(kh)} />
-                      )}
                     </div>
                   </td>
                 </tr>

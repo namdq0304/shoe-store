@@ -168,9 +168,10 @@ export function SelectInput({ id, error, children, className = '', ...props }) {
   );
 }
 
-export function Switch({ checked, onChange, disabled, labelledBy, describedBy }) {
+export function Switch({ checked, onChange, disabled, label, title, labelledBy, describedBy }) {
   return (
-    <button type="button" role="switch" aria-checked={checked} aria-labelledby={labelledBy} aria-describedby={describedBy}
+    <button type="button" role="switch" aria-checked={checked} aria-label={label} title={title || label}
+      aria-labelledby={labelledBy} aria-describedby={describedBy}
       aria-disabled={disabled || undefined} onClick={disabled ? undefined : () => onChange(!checked)}
       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c6f500]/60 ${
         checked ? 'bg-[#c6f500]' : 'bg-zinc-700'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
