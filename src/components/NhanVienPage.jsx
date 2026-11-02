@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/index.js';
 import {
   ConfirmDialog, Field, GhostButton, Icon, IconButton, KpiCard, Modal, PageHeader, Pagination, PrimaryButton,
-  SelectInput, StatusBadge, Switch, TableStateRow, TextInput, Toast, percent, useDebounced, usePagedList, useToast,
+  SelectInput, Switch, TableStateRow, TextInput, Toast, percent, useDebounced, usePagedList, useToast,
 } from './admin/ui.jsx';
 import nhanVienApi from "../api/nhanVienApi.js";
 /**
@@ -233,7 +233,7 @@ export default function NhanVienPage() {
                 <th scope="col" className="px-4 py-3 font-semibold">Số điện thoại</th>
                 <th scope="col" className="px-4 py-3 font-semibold">Email</th>
                 <th scope="col" className="px-4 py-3 font-semibold">Vai trò</th>
-                <th scope="col" className="px-4 py-3 font-semibold">Trạng thái</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-center">Trạng thái</th>
                 <th scope="col" className="px-4 py-3 font-semibold text-right">Thao tác</th>
               </tr>
             </thead>
@@ -259,17 +259,19 @@ export default function NhanVienPage() {
                     <td className="px-4 py-3 font-mono">{nv.sdt || '—'}</td>
                     <td className="px-4 py-3">{nv.email}</td>
                     <td className="px-4 py-3"><VaiTroBadge vaiTro={nv.vaiTro} muted={!nv.trangThai} /></td>
-                    <td className="px-4 py-3"><StatusBadge active={nv.trangThai} /></td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-center">
+                        <Switch checked={nv.trangThai} disabled={self} onChange={() => setConfirm({ kind: 'lock', nv })}
+                          title={self ? 'Không thể khóa tài khoản đang đăng nhập' : undefined}
+                          label={`${nv.trangThai ? 'Khóa' : 'Mở khóa'} tài khoản ${nv.maNhanVien} – ${nv.hoTen}`} />
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <IconButton icon="pencil" label={`Sửa nhân viên ${nv.maNhanVien} – ${nv.hoTen}`} onClick={() => openEdit(nv)} />
                         <IconButton icon="key" label={`Đặt lại mật khẩu ${nv.maNhanVien} – ${nv.hoTen}`} disabled={self}
                           title={self ? 'Đổi mật khẩu của bạn tại trang hồ sơ cá nhân' : undefined}
                           onClick={() => setConfirm({ kind: 'reset', nv })} />
-                        <IconButton icon={nv.trangThai ? 'lock' : 'unlock'} tone={nv.trangThai ? 'default' : 'danger'} disabled={self}
-                          title={self ? 'Không thể khóa tài khoản đang đăng nhập' : undefined}
-                          label={`${nv.trangThai ? 'Khóa' : 'Mở khóa'} tài khoản ${nv.maNhanVien} – ${nv.hoTen}`}
-                          onClick={() => setConfirm({ kind: 'lock', nv })} />
                       </div>
                     </td>
                   </tr>
