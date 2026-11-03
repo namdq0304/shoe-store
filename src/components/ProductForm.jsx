@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { sanPhamApi } from '../api';
+import chiTietSanPhamApi from '../api/chiTietSanPhamApi.js';
+import ProductImages from './ProductImages.jsx';
+import ProductVariants from './ProductVariants.jsx';
+import hinhAnhApi from '../api/hinhAnhApi';
+import { StagedImages, StagedVariants } from './StagedExtras.jsx';
 
 const emptyForm = {
     maSanPham: '', tenSanPham: '',
@@ -53,15 +58,49 @@ function SelectField({ label, value, onChange, options, labelKey, placeholder })
  *   product   — sản phẩm đang sửa (chỉ dùng khi mode = 'edit')
  *   brands, danhMucs, xuatXus, chatLieus — dữ liệu cho các select
  *   onClose   — đóng modal
- *   onSaved   — (sanPham, mode) => void, gọi sau khi lưu thành công
+ *   onSaved   — (sanPham, mode) => void, gọi sau khi lưu thông tin thành công (để tải lại danh sách)
+ *   onChanged — () => void, gọi khi ảnh / biến thể thay đổi (để tải lại danh sách)
+ *
+ * Thêm mới: nhập thông tin + chọn ảnh + thêm biến thể (chưa gửi lên server).
+ * Bấm "Thêm Sản Phẩm" → gọi API tạo sản phẩm → có id → upload ảnh → tạo biến thể.
+ * Nếu bước ảnh/biến thể lỗi, modal chuyển sang chế độ sửa để làm lại phần lỗi.
  */
 export default function ProductForm({
-                                        mode, product, brands, danhMucs, xuatXus, chatLieus, onClose, onSaved,
+                                        mode, product, brands, danhMucs, xuatXus, chatLieus, onClose, onSaved, onChanged,
                                     }) {
-    const isAdd = mode === 'add';
-    const [form, setForm] = useState(isAdd ? emptyForm : toForm(product));
+    // Sản phẩm đã lưu (null khi đang thêm mới và chưa bấm lưu)
+    const [current, setCurrent] = useState(mode === 'add' ? null : product);
+    const isAdd = !current;
+    const [form, setForm] = useState(mode === 'add' ? emptyForm : toForm(product));
     const [error, setError] = useState('');
+    const [notice, setNotice] = useState('');
     const [saving, setSaving] = useState(false);
+
+    // ── Ảnh + biến thể nhập trước khi sản phẩm có id (chỉ dùng khi thêm mới) ──
+    const [stagedImages, setStagedImages] = useState([]);
+    const [stagedMainId, setStagedMainId] = useState(null);
+    const [stagedVariants, setStagedVariants] = useState([]);
+
+    // ── Biến thể ──
+    const [variants, setVariants] = useState([]);
+    const [varLoading, setVarLoading] = useState(false);
+    const productId = current?.id;
+
+    const loadVariants = async () => {
+        setVarLoading(true);
+        try {
+            const data = await chiTietSanPhamApi.getBySanPham(productId);
+            setVariants(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error('Không thể tải biến thể:', err);
+        } finally {
+            setVarLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (productId) loadVariants();
+    }, [productId]);
 
     const setField = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -96,10 +135,67 @@ export default function ProductForm({
                 giaGoc:       form.giaGoc !== '' ? Number(form.giaGoc) : null,
                 moTa:         form.moTa.trim(),
             };
-            const saved = isAdd
-                ? await sanPhamApi.create(payload)
-                : await sanPhamApi.update(product.id, payload);
-            await onSaved(saved, mode);
+            if (!isAdd) {
+                // ── SỬA: chỉ cập nhật thông tin, ảnh/biến thể đã lưu riêng ──
+                const saved = await sanPhamApi.update(current.id, payload);
+                await onSaved?.(saved, 'edit');
+                onClose();
+                return;
+            }
+
+            // ── THÊM: 1) tạo sản phẩm → lấy id ──
+            const saved = await sanPhamApi.create(payload);
+            const newId = saved?.data?.data?.id;
+            console.log(149,saved.data , newId)
+            if (!newId) throw new Error('Server không trả về id sản phẩm!');
+
+            const problems = [];
+
+            // 2) upload ảnh (mọi ảnh một lượt), rồi đặt ảnh chính
+            if (stagedImages.length > 0) {
+                try {
+                    const added = await hinhAnhApi.upload(newId, stagedImages.map((i) => i.file));
+                    const mainIdx = Math.max(0, stagedImages.findIndex((i) => i.id === stagedMainId));
+                    if (Array.isArray(added) && added[mainIdx]) {
+                        await hinhAnhApi.setAnhChinh(added[mainIdx].id);
+                    }
+                } catch (e) {
+                    problems.push(`Ảnh: ${e.response?.data?.message || e.message || 'upload thất bại'}`);
+                }
+            }
+
+            // 3) tạo biến thể: mỗi màu một lần createBulk
+            for (const v of stagedVariants) {
+                try {
+                    await chiTietSanPhamApi.createBulk({
+                        sanPhamId: newId,
+                        mauSacId: v.mauSacId,
+                        giaBan: v.giaBan,
+                        giaGoc: v.giaGoc,
+                        giaNhap: v.giaNhap,
+                        items: v.items.map(({ kichThuocId, soLuong }) => ({ kichThuocId, soLuong })),
+                    });
+                } catch (e) {
+                    problems.push(`Màu ${v.tenMau}: ${e.response?.data?.message || e.message || 'thêm thất bại'}`);
+                }
+            }
+
+            await onSaved?.(saved, 'add');
+
+            if (problems.length === 0) {
+                onClose();
+            } else {
+                // Sản phẩm đã tạo: chuyển sang chế độ sửa để làm lại phần lỗi
+                // (ảnh/biến thể đã lưu thành công sẽ hiện ra từ server)
+                stagedImages.forEach((i) => URL.revokeObjectURL(i.url));
+                setStagedImages([]); setStagedVariants([]); setStagedMainId(null);
+                setCurrent(saved);
+                setForm(toForm(saved));
+                setError(
+                    'Đã tạo sản phẩm nhưng một số mục chưa lưu được, vui lòng thêm lại bên dưới:\n• ' +
+                    problems.join('\n• ')
+                );
+            }
         } catch (e) {
             setError(e.response?.data?.message || e.message || 'Lưu sản phẩm thất bại!');
         } finally {
@@ -109,7 +205,7 @@ export default function ProductForm({
 
     return (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10">
@@ -121,9 +217,15 @@ export default function ProductForm({
 
                 {/* Body */}
                 <div className="p-6 space-y-4 text-xs">
+                    {notice && (
+                        <div className="p-3 rounded-xl bg-[#c6f500]/10 border border-[#c6f500]/30 text-[#c6f500] flex items-center gap-2">
+                            <span className="flex-1">{notice}</span>
+                            <button onClick={() => setNotice('')} className="font-bold hover:text-white">✕</button>
+                        </div>
+                    )}
                     {error && (
                         <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 flex items-center gap-2">
-                            <span>⚠️</span><span>{error}</span>
+                            <span>⚠️</span><span className="whitespace-pre-line">{error}</span>
                         </div>
                     )}
 
@@ -172,22 +274,49 @@ export default function ProductForm({
                                   placeholder="Mô tả ngắn về sản phẩm..." className={`${inputCls} resize-none`} />
                     </Field>
 
-                    {isAdd && (
-                        <p className="text-[11px] text-zinc-500">
-                            💡 Sau khi lưu, cửa sổ chi tiết sẽ mở để bạn thêm ảnh và biến thể (màu, size, số lượng).
-                        </p>
-                    )}
                 </div>
+
+                {/* Ảnh + biến thể */}
+                {isAdd ? (
+                    <div className="border-t border-zinc-800 pt-5">
+                        <StagedImages
+                            images={stagedImages} setImages={setStagedImages}
+                            mainId={stagedMainId} setMainId={setStagedMainId}
+                        />
+                        <StagedVariants
+                            variants={stagedVariants} setVariants={setStagedVariants}
+                            defaultGiaBan={form.giaBan} defaultGiaGoc={form.giaGoc}
+                        />
+                    </div>
+                ) : (
+                    <div className="border-t border-zinc-800 pt-5">
+                        <ProductImages
+                            productId={productId}
+                            fallbackSrc={current.urlAnh || ''}
+                            onChanged={onChanged}
+                        />
+                        <ProductVariants
+                            product={current}
+                            isAdmin
+                            variants={variants}
+                            loading={varLoading}
+                            onChanged={async () => {
+                                await loadVariants();
+                                onChanged?.();
+                            }}
+                        />
+                    </div>
+                )}
 
                 {/* Footer */}
                 <div className="px-6 pb-6 flex gap-3 justify-end border-t border-zinc-800 pt-4">
                     <button onClick={onClose} disabled={saving}
                             className="px-5 py-2.5 bg-zinc-800 text-zinc-300 font-bold text-xs rounded-xl hover:bg-zinc-700 transition">
-                        Hủy
+                        {isAdd ? 'Hủy' : 'Đóng'}
                     </button>
                     <button onClick={handleSave} disabled={saving}
                             className="px-6 py-2.5 bg-[#c6f500] hover:bg-[#b0dc00] text-black font-black text-xs rounded-xl transition shadow disabled:opacity-50">
-                        {saving ? 'Đang lưu...' : isAdd ? '➕ Thêm Sản Phẩm' : '💾 Lưu Thay Đổi'}
+                        {saving ? 'Đang lưu...' : isAdd ? '➕ Thêm Sản Phẩm' : '💾 Lưu Thông Tin'}
                     </button>
                 </div>
             </div>
