@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { sanPhamApi } from '../api';
-import ProductDetail from './ProductDetail';
 import ProductForm from './ProductForm';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
 import Pagination from './Pagination';
@@ -59,7 +58,7 @@ export default function AdminProduct({ isAdmin }) {
         }
     };
 
-    // ── Modal: null | 'view' | 'add' | 'edit' | 'delete' ───────────────────
+    // ── Modal: null | 'add' | 'edit' | 'delete' ───────────────────
     const [prodModal, setProdModal] = useState(null);
     const [selectedProd, setSelectedProd] = useState(null);
 
@@ -126,19 +125,13 @@ export default function AdminProduct({ isAdmin }) {
     // ── Mở / đóng modal ────────────────────────────────────────────────────
     const openAdd = () => { setSelectedProd(null); setProdModal('add'); };
     const openEdit = (p) => { setSelectedProd(p); setProdModal('edit'); };
-    const openView = (p) => { setSelectedProd(p); setProdModal('view'); };
     const openDelete = (p) => { setSelectedProd(p); setProdModal('delete'); };
     const closeModal = () => { setProdModal(null); setSelectedProd(null); };
 
-    // Gọi sau khi ProductForm lưu thành công
-    const handleSaved = async (saved, mode) => {
+    // Gọi sau khi ProductForm lưu thông tin thành công: chỉ tải lại danh sách,
+    // việc đóng modal do ProductForm tự quyết định (thêm mới thì giữ mở để thêm ảnh/biến thể)
+    const handleSaved = async () => {
         await fetchProducts();
-        if (mode === 'add' && saved?.id) {
-            setSelectedProd(saved);   // mở chi tiết để thêm ảnh và biến thể
-            setProdModal('view');
-        } else {
-            closeModal();
-        }
     };
 
     const handleDeleteProduct = async () => {
@@ -348,12 +341,6 @@ export default function AdminProduct({ isAdmin }) {
                                     {/* Hành động */}
                                     <td className="px-4 py-3">
                                         <div className="flex items-center justify-center gap-1.5">
-                                            <button
-                                                onClick={() => openView(p)}
-                                                className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-bold rounded-lg transition"
-                                            >
-                                                👁 Xem
-                                            </button>
                                             {isAdmin && (
                                                 <button
                                                     onClick={() => openEdit(p)}
@@ -390,19 +377,7 @@ export default function AdminProduct({ isAdmin }) {
                 onPageSize={(n) => { setPageSize(n); setPage(0); }}
             />
 
-            {/* ── Modal xem chi tiết ── */}
-            {prodModal === 'view' && selectedProd && (
-                <ProductDetail
-                    product={selectedProd}
-                    isAdmin={isAdmin}
-                    onClose={closeModal}
-                    onImagesChanged={fetchProducts}
-                    tenThuongHieu={brandMap.get(String(selectedProd.thuongHieuId))}
-                    tenChatLieu={chatLieuMap.get(String(selectedProd.chatLieuId))}
-                />
-            )}
-
-            {/* ── Modal thêm / sửa (chỉ ADMIN) ── */}
+            {/* ── Modal thêm / sửa + quản lý ảnh, biến thể (chỉ ADMIN) ── */}
             {(prodModal === 'add' || prodModal === 'edit') && isAdmin && (
                 <ProductForm
                     mode={prodModal}
@@ -413,6 +388,7 @@ export default function AdminProduct({ isAdmin }) {
                     chatLieus={chatLieus}
                     onClose={closeModal}
                     onSaved={handleSaved}
+                    onChanged={fetchProducts}
                 />
             )}
 
