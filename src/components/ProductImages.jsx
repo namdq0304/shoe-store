@@ -98,14 +98,14 @@ export default function ProductImages({ productId, fallbackSrc = '', onChanged }
 
     return (
         <div className="px-6 pb-6">
-            <h4 className="text-xs font-black uppercase text-zinc-300 mb-2">Ảnh sản phẩm ({images.length})</h4>
+            <h4 className="text-xs font-black uppercase text-slate-700 mb-2">Ảnh sản phẩm ({images.length})</h4>
 
             <div className="flex flex-col sm:flex-row gap-4">
                 {/* Ảnh lớn */}
-                <div className="relative rounded-2xl overflow-hidden bg-zinc-950 w-full sm:w-48 aspect-square shrink-0">
+                <div className="relative rounded-2xl overflow-hidden bg-white w-full sm:w-48 aspect-square shrink-0">
                     {mainSrc
                         ? <img src={mainSrc} alt="" className="w-full h-full object-cover" />
-                        : <div className="w-full h-full flex items-center justify-center text-zinc-600 text-4xl">👟</div>}
+                        : <div className="w-full h-full flex items-center justify-center text-slate-400 text-4xl">👟</div>}
                     {imgLoading && (
                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                             <div className="w-5 h-5 border-2 border-[#c6f500] border-t-transparent rounded-full animate-spin" />
@@ -123,7 +123,7 @@ export default function ProductImages({ productId, fallbackSrc = '', onChanged }
                             <div key={img.id} className="relative group">
                                 <button type="button" onClick={() => setActiveIdx(i)}
                                         className={`block w-14 h-14 rounded-xl overflow-hidden border-2 transition ${
-                                            i === activeIdx ? 'border-[#c6f500]' : 'border-zinc-700 hover:border-zinc-500'}`}>
+                                            i === activeIdx ? 'border-[#c6f500]' : 'border-slate-300 hover:border-slate-400'}`}>
                                     <img src={toSrc(img.urlAnh)} alt={img.tenAnh} className="w-full h-full object-cover" />
                                 </button>
                                 {img.anhChinh && <span className="absolute -top-1 -left-1 text-[10px]">⭐</span>}
@@ -134,7 +134,7 @@ export default function ProductImages({ productId, fallbackSrc = '', onChanged }
                         ))}
 
                         <button type="button" disabled={busy} onClick={() => fileRef.current?.click()}
-                                className="w-14 h-14 rounded-xl border-2 border-dashed border-zinc-600 hover:border-[#c6f500] text-zinc-400 hover:text-[#c6f500] text-xl font-bold flex items-center justify-center transition disabled:opacity-40"
+                                className="w-14 h-14 rounded-xl border-2 border-dashed border-slate-300 hover:border-[#c6f500] text-slate-500 hover:text-lime-700 text-xl font-bold flex items-center justify-center transition disabled:opacity-40"
                                 title="Thêm ảnh">
                             {busy ? <div className="w-4 h-4 border-2 border-[#c6f500] border-t-transparent rounded-full animate-spin" /> : '＋'}
                         </button>
@@ -142,20 +142,20 @@ export default function ProductImages({ productId, fallbackSrc = '', onChanged }
                     </div>
 
                     {!imgLoading && images.length === 0 && (
-                        <p className="text-[11px] text-zinc-500 mt-2">Chưa có ảnh nào, bấm ＋ để thêm.</p>
+                        <p className="text-[11px] text-slate-500 mt-2">Chưa có ảnh nào, bấm ＋ để thêm.</p>
                     )}
 
                     {current && !current.anhChinh && (
                         <button type="button" disabled={busy} onClick={() => handleSetMain(current)}
-                                className="mt-3 px-3 py-1.5 bg-zinc-800 hover:bg-[#c6f500]/10 border border-zinc-700 hover:border-[#c6f500]/50 text-[#c6f500] text-[11px] font-bold rounded-lg transition disabled:opacity-40">
+                                className="mt-3 px-3 py-1.5 bg-slate-100 hover:bg-[#c6f500]/10 border border-slate-300 hover:border-[#c6f500]/50 text-lime-700 text-[11px] font-bold rounded-lg transition disabled:opacity-40">
                             ⭐ Đặt làm ảnh chính
                         </button>
                     )}
 
                     {imgError && (
-                        <div className="mt-2 p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] flex items-center gap-2">
+                        <div className="mt-2 p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 text-[11px] flex items-center gap-2">
                             <span className="flex-1">{imgError}</span>
-                            <button onClick={() => setImgError('')} className="font-bold hover:text-white">✕</button>
+                            <button onClick={() => setImgError('')} className="font-bold hover:text-slate-900">✕</button>
                         </div>
                     )}
                 </div>

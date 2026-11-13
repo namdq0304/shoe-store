@@ -7,7 +7,7 @@ const fmt = (v) => (v != null ? Number(v).toLocaleString('vi-VN') + '₫' : '—
 const errMsg = (e, fb) => e?.response?.data?.message || e?.message || fb;
 const toNum = (s) => (s === '' || s == null ? null : Number(s));
 const badNum = (n) => n !== null && (isNaN(n) || n < 0);
-const inputCls = 'bg-zinc-950 border border-zinc-700 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-[#c6f500]';
+const inputCls = 'bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-900 focus:outline-none focus:border-[#c6f500]';
 
 export default function ProductVariants({ product: p, isAdmin, variants, loading, onChanged }) {
     const [showAdd, setShowAdd] = useState(false);
@@ -67,7 +67,7 @@ export default function ProductVariants({ product: p, isAdmin, variants, loading
     return (
         <div className="px-6 pb-6">
             <div className="flex items-center justify-between mb-2">
-                <h4 className="text-xs font-black uppercase text-zinc-300">Chi tiết ({variants.length})</h4>
+                <h4 className="text-xs font-black uppercase text-slate-700">Chi tiết ({variants.length})</h4>
                 {isAdmin && !showAdd && (
                     <button onClick={() => { setShowAdd(true); setNotice(''); }}
                             className="px-3 py-1.5 bg-[#c6f500] hover:bg-[#b0dc00] text-black text-[11px] font-black rounded-lg transition">
@@ -77,12 +77,12 @@ export default function ProductVariants({ product: p, isAdmin, variants, loading
             </div>
 
             {error && (
-                <div className="mb-2 p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] flex items-center gap-2">
+                <div className="mb-2 p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 text-[11px] flex items-center gap-2">
                     <span className="flex-1">{error}</span>
-                    <button onClick={() => setError('')} className="font-bold hover:text-white">✕</button>
+                    <button onClick={() => setError('')} className="font-bold hover:text-slate-900">✕</button>
                 </div>
             )}
-            {notice && <div className="mb-2 p-2 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-400 text-[11px]">{notice}</div>}
+            {notice && <div className="mb-2 p-2 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-600 text-[11px]">{notice}</div>}
 
             {isAdmin && showAdd && (
                 <AddVariantForm
@@ -96,9 +96,9 @@ export default function ProductVariants({ product: p, isAdmin, variants, loading
                 />
             )}
 
-            <div className="border border-zinc-800 rounded-xl overflow-x-auto">
+            <div className="border border-slate-200 rounded-xl overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                    <thead className="bg-zinc-950 text-zinc-400 uppercase">
+                    <thead className="bg-white text-slate-500 uppercase">
                     <tr>
                         <th className="px-3 py-2">Mã</th>
                         <th className="px-3 py-2">Màu</th>
@@ -110,23 +110,23 @@ export default function ProductVariants({ product: p, isAdmin, variants, loading
                         {isAdmin && <th className="px-3 py-2 text-center">Thao tác</th>}
                     </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800">
-                    {loading && <tr><td colSpan={cols} className="px-3 py-4 text-center text-zinc-500">Đang tải...</td></tr>}
+                    <tbody className="divide-y divide-slate-200">
+                    {loading && <tr><td colSpan={cols} className="px-3 py-4 text-center text-slate-500">Đang tải...</td></tr>}
                     {!loading && variants.length === 0 && (
-                        <tr><td colSpan={cols} className="px-3 py-4 text-center text-zinc-500">Chưa có chi tiết nào.</td></tr>
+                        <tr><td colSpan={cols} className="px-3 py-4 text-center text-slate-500">Chưa có chi tiết nào.</td></tr>
                     )}
                     {sorted.map((v) => {
                         const editing = editId === v.id;
                         const ban = v.giaBanHieuLuc, goc = v.giaGocHieuLuc;
                         return (
                             <tr key={v.id}>
-                                <td className="px-3 py-2 font-mono text-zinc-500">{v.maChiTiet}</td>
+                                <td className="px-3 py-2 font-mono text-slate-500">{v.maChiTiet}</td>
                                 <td className="px-3 py-2">
-                    <span className="inline-block w-2.5 h-2.5 rounded-full mr-1.5 align-middle border border-zinc-600"
+                    <span className="inline-block w-2.5 h-2.5 rounded-full mr-1.5 align-middle border border-slate-300"
                           style={{ background: v.maHex || '#888' }} />
                                     {v.tenMau}
                                 </td>
-                                <td className="px-3 py-2 text-center font-bold text-white">{v.tenKichThuoc}</td>
+                                <td className="px-3 py-2 text-center font-bold text-slate-900">{v.tenKichThuoc}</td>
 
                                 <td className="px-3 py-2 text-center">
                                     {editing ? (
@@ -135,17 +135,17 @@ export default function ProductVariants({ product: p, isAdmin, variants, loading
                                                className={`w-16 text-center ${inputCls}`} />
                                     ) : (
                                         <span className={`px-2 py-0.5 rounded-lg font-bold ${
-                                            v.soLuong === 0 ? 'bg-red-500/15 text-red-400'
-                                                : v.soLuong <= 10 ? 'bg-amber-400/15 text-amber-400'
-                                                    : 'bg-[#c6f500]/15 text-[#c6f500]'}`}>{v.soLuong}</span>
+                                            v.soLuong === 0 ? 'bg-red-500/15 text-red-600'
+                                                : v.soLuong <= 10 ? 'bg-amber-400/15 text-amber-600'
+                                                    : 'bg-[#c6f500]/15 text-lime-700'}`}>{v.soLuong}</span>
                                     )}
                                 </td>
 
                                 <td className="px-3 py-2 text-right">
                                     {editing ? priceInput('giaBan') : (
-                                        <span className="text-zinc-200">
+                                        <span className="text-slate-800">
                         {fmt(ban)}
-                                            {v.giaBan == null && <span className="text-zinc-600 text-[10px] ml-1">(mặc định)</span>}
+                                            {v.giaBan == null && <span className="text-slate-400 text-[10px] ml-1">(mặc định)</span>}
                       </span>
                                     )}
                                 </td>
@@ -153,15 +153,15 @@ export default function ProductVariants({ product: p, isAdmin, variants, loading
                                 <td className="px-3 py-2 text-right">
                                     {editing ? priceInput('giaGoc') : (
                                         goc != null && ban != null && goc > ban
-                                            ? <span className="text-zinc-500 line-through">{fmt(goc)}</span>
-                                            : <span className="text-zinc-600">—</span>
+                                            ? <span className="text-slate-500 line-through">{fmt(goc)}</span>
+                                            : <span className="text-slate-400">—</span>
                                     )}
                                 </td>
 
                                 {isAdmin && (
                                     <td className="px-3 py-2 text-right">
                                         {editing ? priceInput('giaNhap') : (
-                                            <span className={v.giaNhap == null ? 'text-zinc-600' : 'text-sky-300'}>{fmt(v.giaNhap)}</span>
+                                            <span className={v.giaNhap == null ? 'text-slate-400' : 'text-sky-700'}>{fmt(v.giaNhap)}</span>
                                         )}
                                     </td>
                                 )}
@@ -174,14 +174,14 @@ export default function ProductVariants({ product: p, isAdmin, variants, loading
                                                     <button disabled={busy} onClick={() => saveEdit(v)}
                                                             className="px-2.5 py-1 bg-[#c6f500] text-black text-[10px] font-black rounded-lg disabled:opacity-50">💾</button>
                                                     <button disabled={busy} onClick={() => setEditId(null)}
-                                                            className="px-2.5 py-1 bg-zinc-800 text-zinc-300 text-[10px] font-bold rounded-lg">Hủy</button>
+                                                            className="px-2.5 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold rounded-lg">Hủy</button>
                                                 </>
                                             ) : (
                                                 <>
                                                     <button disabled={busy} onClick={() => startEdit(v)}
-                                                            className="px-2.5 py-1 bg-zinc-900 hover:bg-[#c6f500]/10 border border-zinc-700 text-[#c6f500] text-[10px] font-bold rounded-lg disabled:opacity-50">✏️</button>
+                                                            className="px-2.5 py-1 bg-slate-50 hover:bg-[#c6f500]/10 border border-slate-300 text-lime-700 text-[10px] font-bold rounded-lg disabled:opacity-50">✏️</button>
                                                     <button disabled={busy} onClick={() => handleDelete(v)}
-                                                            className="px-2.5 py-1 bg-zinc-900 hover:bg-red-500/10 border border-zinc-700 text-zinc-500 hover:text-red-400 text-[10px] font-bold rounded-lg disabled:opacity-50">🗑️</button>
+                                                            className="px-2.5 py-1 bg-slate-50 hover:bg-red-500/10 border border-slate-300 text-slate-500 hover:text-red-600 text-[10px] font-bold rounded-lg disabled:opacity-50">🗑️</button>
                                                 </>
                                             )}
                                         </div>
@@ -245,19 +245,19 @@ function AddVariantForm({ product: p, onCancel, onDone }) {
     const cls = `w-full ${inputCls} py-1.5`;
     const priceField = (key, label, placeholder) => (
         <div>
-            <label className="block font-bold text-zinc-400 mb-1">{label}</label>
+            <label className="block font-bold text-slate-500 mb-1">{label}</label>
             <input type="number" min="0" value={price[key]} placeholder={placeholder}
                    onChange={(e) => setPrice({ ...price, [key]: e.target.value })} className={cls} />
         </div>
     );
 
     return (
-        <div className="mb-3 p-4 rounded-xl border border-zinc-700 bg-zinc-950/60 space-y-3 text-xs">
-            <div className="font-black uppercase text-zinc-300">Thêm chi tiết mới</div>
-            {error && <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">{error}</div>}
+        <div className="mb-3 p-4 rounded-xl border border-slate-300 bg-white/60 space-y-3 text-xs">
+            <div className="font-black uppercase text-slate-700">Thêm chi tiết mới</div>
+            {error && <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600">{error}</div>}
 
             <div>
-                <label className="block font-bold text-zinc-400 mb-1">Màu *</label>
+                <label className="block font-bold text-slate-500 mb-1">Màu *</label>
                 <select value={mauId} onChange={(e) => setMauId(e.target.value)} className={cls}>
                     <option value="">-- Chọn màu --</option>
                     {colors.map((c) => <option key={c.id} value={c.id}>{c.tenMau}</option>)}
@@ -271,14 +271,14 @@ function AddVariantForm({ product: p, onCancel, onDone }) {
             </div>
 
             <div>
-                <label className="block font-bold text-zinc-400 mb-1.5">Size * (bấm để chọn nhiều)</label>
+                <label className="block font-bold text-slate-500 mb-1.5">Size * (bấm để chọn nhiều)</label>
                 <div className="flex flex-wrap gap-2">
                     {sizes.map((s) => (
                         <button key={s.id} type="button" onClick={() => toggleSize(String(s.id))}
                                 className={`w-10 h-10 rounded-xl font-bold border transition ${
                                     String(s.id) in qtyBySize
                                         ? 'bg-[#c6f500] text-black border-[#c6f500]'
-                                        : 'bg-zinc-950 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}>
+                                        : 'bg-white border-slate-300 text-slate-500 hover:border-slate-400'}`}>
                             {s.tenKichThuoc}
                         </button>
                     ))}
@@ -287,11 +287,11 @@ function AddVariantForm({ product: p, onCancel, onDone }) {
 
             {selectedIds.length > 0 && (
                 <div>
-                    <label className="block font-bold text-zinc-400 mb-1.5">Số lượng từng size</label>
+                    <label className="block font-bold text-slate-500 mb-1.5">Số lượng từng size</label>
                     <div className="flex flex-wrap gap-2">
                         {selectedIds.map((id) => (
-                            <div key={id} className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1">
-                                <span className="font-bold text-white w-6 text-center">{sizes.find((x) => String(x.id) === id)?.tenKichThuoc}</span>
+                            <div key={id} className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
+                                <span className="font-bold text-slate-900 w-6 text-center">{sizes.find((x) => String(x.id) === id)?.tenKichThuoc}</span>
                                 <input type="number" min="0" value={qtyBySize[id]} placeholder="SL"
                                        onChange={(e) => setQtyBySize({ ...qtyBySize, [id]: e.target.value })}
                                        className={`w-16 text-center ${inputCls}`} />
@@ -302,7 +302,7 @@ function AddVariantForm({ product: p, onCancel, onDone }) {
             )}
 
             <div className="flex justify-end gap-2 pt-1">
-                <button onClick={onCancel} disabled={saving} className="px-4 py-2 bg-zinc-800 text-zinc-300 font-bold rounded-lg hover:bg-zinc-700">Hủy</button>
+                <button onClick={onCancel} disabled={saving} className="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200">Hủy</button>
                 <button onClick={submit} disabled={saving}
                         className="px-4 py-2 bg-[#c6f500] hover:bg-[#b0dc00] text-black font-black rounded-lg disabled:opacity-50">
                     {saving ? 'Đang lưu...' : `Lưu ${selectedIds.length || ''} chi tiết`}

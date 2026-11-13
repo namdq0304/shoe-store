@@ -229,7 +229,7 @@ function AttributeTable({ config, isAdmin }) {
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500"
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500"
             fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
               d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
@@ -242,14 +242,14 @@ function AttributeTable({ config, isAdmin }) {
               setSearch(e.target.value)
               setPage(0);
             }}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-8 pr-4 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#c6f500] transition"
+            className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#c6f500] transition"
           />
         </div>
         <button
           onClick={fetchItems}
           disabled={loading}
           title="Tải lại"
-          className="px-3 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold rounded-xl transition disabled:opacity-50"
+          className="px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold rounded-xl transition disabled:opacity-50"
         >
           {loading ? '⏳' : '🔄'}
         </button>
@@ -265,16 +265,16 @@ function AttributeTable({ config, isAdmin }) {
 
       {/* Error */}
       {error && (
-        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
+        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-xs flex items-center gap-2">
           <span>⚠️</span><span>{error}</span>
-          <button onClick={() => setError('')} className="ml-auto font-bold hover:text-white">✕</button>
+          <button onClick={() => setError('')} className="ml-auto font-bold hover:text-slate-900">✕</button>
         </div>
       )}
 
       {/* Table */}
-      <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
         <table className="w-full text-xs text-left">
-          <thead className="bg-zinc-900 border-b border-zinc-800 text-zinc-400 uppercase tracking-wide">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wide">
             <tr>
               <th className="px-4 py-3 font-bold w-10">#</th>
               <th className="px-4 py-3 font-bold">Tên</th>
@@ -286,11 +286,11 @@ function AttributeTable({ config, isAdmin }) {
               <th className="px-4 py-3 font-bold text-center">Hành Động</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800/60">
+          <tbody className="divide-y divide-slate-200/60">
             {loading && items.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center">
-                  <div className="flex items-center justify-center gap-2 text-zinc-500">
+                  <div className="flex items-center justify-center gap-2 text-slate-500">
                     <div className="w-4 h-4 border-2 border-[#c6f500] border-t-transparent rounded-full animate-spin" />
                     <span>Đang tải...</span>
                   </div>
@@ -299,7 +299,7 @@ function AttributeTable({ config, isAdmin }) {
             )}
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-zinc-500">
+                <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
                   {items.length === 0
                     ? `Chưa có ${config.label.toLowerCase()} nào.`
                     : 'Không tìm thấy kết quả phù hợp.'}
@@ -307,17 +307,17 @@ function AttributeTable({ config, isAdmin }) {
               </tr>
             )}
             {items.map((item, idx) => (
-              <tr key={item.id} className="hover:bg-zinc-900/40 transition">
-                <td className="px-4 py-3 text-zinc-500">{idx + 1}</td>
-                <td className="px-4 py-3 font-bold text-white">{getName(item)}</td>
-                <td className="px-4 py-3 font-mono text-[#c6f500]">{getCode(item)}</td>
+              <tr key={item.id} className="hover:bg-slate-50/40 transition">
+                <td className="px-4 py-3 text-slate-500">{idx + 1}</td>
+                <td className="px-4 py-3 font-bold text-slate-900">{getName(item)}</td>
+                <td className="px-4 py-3 font-mono text-lime-700">{getCode(item)}</td>
                 {hasDesc && (
-                <td className="px-4 py-3 text-zinc-400 hidden sm:table-cell max-w-[200px] truncate">
+                <td className="px-4 py-3 text-slate-500 hidden sm:table-cell max-w-[200px] truncate">
                   {isColor ? (
                       item[descField] ? (
                           <span className="inline-flex items-center gap-2">
         <span
-            className="w-4 h-4 rounded border border-zinc-600"
+            className="w-4 h-4 rounded border border-slate-300"
             style={{ backgroundColor: item[descField] }}
         />
         <span className="font-mono">{item[descField]}</span>
@@ -341,11 +341,11 @@ function AttributeTable({ config, isAdmin }) {
                               title={isAdmin ? (active ? 'Bấm để ẩn' : 'Bấm để kích hoạt lại') : 'Chỉ admin được đổi'}
                               className={`relative w-10 h-5 rounded-full transition-colors duration-200 focus:outline-none
             disabled:opacity-50 ${isAdmin ? 'cursor-pointer' : 'cursor-not-allowed'}
-            ${active ? 'bg-[#c6f500]' : 'bg-zinc-700'}`}
+            ${active ? 'bg-[#c6f500]' : 'bg-slate-200'}`}
                           >
           <span
               className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow transition-transform duration-200
-              ${active ? 'translate-x-5 bg-black' : 'translate-x-0 bg-zinc-400'}`}
+              ${active ? 'translate-x-5 bg-white' : 'translate-x-0 bg-slate-400'}`}
           />
                           </button>
 
@@ -358,7 +358,7 @@ function AttributeTable({ config, isAdmin }) {
                     {isAdmin && (
                       <button
                         onClick={() => openEdit(item)}
-                        className="px-3 py-1.5 bg-zinc-900 hover:bg-[#c6f500]/10 border border-zinc-700 hover:border-[#c6f500]/50 text-[#c6f500] text-[10px] font-bold rounded-lg transition"
+                        className="px-3 py-1.5 bg-slate-50 hover:bg-[#c6f500]/10 border border-slate-300 hover:border-[#c6f500]/50 text-lime-700 text-[10px] font-bold rounded-lg transition"
                       >
                         ✏️ Sửa
                       </button>
@@ -366,13 +366,13 @@ function AttributeTable({ config, isAdmin }) {
                     {/*{isAdmin && (*/}
                     {/*  <button*/}
                     {/*    onClick={() => openDelete(item)}*/}
-                    {/*    className="px-2.5 py-1.5 bg-zinc-900 hover:bg-red-500/10 border border-zinc-700 hover:border-red-500/40 text-zinc-500 hover:text-red-400 text-[10px] font-bold rounded-lg transition"*/}
+                    {/*    className="px-2.5 py-1.5 bg-slate-50 hover:bg-red-500/10 border border-slate-300 hover:border-red-500/40 text-slate-500 hover:text-red-600 text-[10px] font-bold rounded-lg transition"*/}
                     {/*  >*/}
                     {/*    🗑️*/}
                     {/*  </button>*/}
                     {/*)}*/}
                     {!isAdmin && (
-                      <span className="text-zinc-600 text-[10px]">Chỉ xem</span>
+                      <span className="text-slate-400 text-[10px]">Chỉ xem</span>
                     )}
                   </div>
                 </td>
@@ -385,7 +385,7 @@ function AttributeTable({ config, isAdmin }) {
       {/* Tổng số */}
       {totalElements > 0 && (
           <>
-            <p className="text-[11px] text-zinc-600 text-right">
+            <p className="text-[11px] text-slate-400 text-right">
               {totalElements} {config.label.toLowerCase()}
             </p>
             <Pagination
@@ -402,24 +402,24 @@ function AttributeTable({ config, isAdmin }) {
       {/* ── Modal Thêm / Sửa ── */}
       {(modal === 'add' || modal === 'edit') && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-              <h3 className="font-black text-sm uppercase text-white">
+          <div className="bg-slate-50 border border-slate-300 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+              <h3 className="font-black text-sm uppercase text-slate-900">
                 {modal === 'add' ? `➕ Thêm ${config.label}` : `✏️ Sửa ${config.label}`}
               </h3>
-              <button onClick={closeModal} className="w-8 h-8 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center font-bold transition">✕</button>
+              <button onClick={closeModal} className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-bold transition">✕</button>
             </div>
 
             <div className="p-6 space-y-4 text-xs">
               {formError && (
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 flex items-center gap-2">
                   <span>⚠️</span><span>{formError}</span>
                 </div>
               )}
 
               <div>
-                <label className="block font-bold text-zinc-300 uppercase mb-1.5">
-                  Tên {config.label} <span className="text-red-400">*</span>
+                <label className="block font-bold text-slate-700 uppercase mb-1.5">
+                  Tên {config.label} <span className="text-red-600">*</span>
                 </label>
                 <input
                   value={formName}
@@ -427,36 +427,36 @@ function AttributeTable({ config, isAdmin }) {
                   placeholder={namePlaceholder}
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-                  className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#c6f500] transition"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#c6f500] transition"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-zinc-300 uppercase mb-1.5">Mã</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1.5">Mã</label>
                 <input
                   value={formCode}
                   onChange={(e) => setFormCode(e.target.value.toUpperCase())}
                   placeholder={codePlaceholder}
-                  className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-white placeholder-zinc-600 font-mono focus:outline-none focus:border-[#c6f500] transition"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 placeholder-slate-400 font-mono focus:outline-none focus:border-[#c6f500] transition"
                 />
               </div>
               {hasDesc && (
               <div>
-                <label className="block font-bold text-zinc-300 uppercase mb-1.5">{descLabel}</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1.5">{descLabel}</label>
                 {isColor ? (
                     <div className="flex items-center gap-2">
                       <input
                           type="color"
                           value={HEX_RE.test(formMoTa) ? formMoTa : '#000000'}
                           onChange={(e) => setFormMoTa(e.target.value.toUpperCase())}
-                          className="w-12 h-10 bg-zinc-950 border border-zinc-700 rounded-xl cursor-pointer p-1"
+                          className="w-12 h-10 bg-white border border-slate-300 rounded-xl cursor-pointer p-1"
                       />
                       <input
                           value={formMoTa}
                           onChange={(e) => setFormMoTa(e.target.value.toUpperCase())}
                           placeholder="#000000"
                           maxLength={7}
-                          className="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-white placeholder-zinc-600 font-mono focus:outline-none focus:border-[#c6f500] transition"
+                          className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 placeholder-slate-400 font-mono focus:outline-none focus:border-[#c6f500] transition"
                       />
                     </div>
                 ) : (
@@ -465,16 +465,16 @@ function AttributeTable({ config, isAdmin }) {
                         onChange={(e) => setFormMoTa(e.target.value)}
                         placeholder="Mô tả ngắn (tùy chọn)..."
                         rows={2}
-                        className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#c6f500] transition resize-none"
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#c6f500] transition resize-none"
                     />
                 )}
               </div> )}
             </div>
 
-            <div className="px-6 pb-6 flex gap-3 justify-end border-t border-zinc-800 pt-4">
+            <div className="px-6 pb-6 flex gap-3 justify-end border-t border-slate-200 pt-4">
               <button
                 onClick={closeModal}
-                className="px-5 py-2.5 bg-zinc-800 text-zinc-300 font-bold text-xs rounded-xl hover:bg-zinc-700 transition"
+                className="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-200 transition"
               >
                 Hủy
               </button>
@@ -494,20 +494,20 @@ function AttributeTable({ config, isAdmin }) {
       {/* ── Modal Xác nhận Xóa ── */}
       {modal === 'delete' && selected && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl">
+          <div className="bg-slate-50 border border-slate-300 rounded-3xl max-w-sm w-full p-6 shadow-2xl">
             <div className="text-center space-y-3 mb-6">
               <div className="text-4xl">🗑️</div>
-              <h3 className="font-black text-base uppercase text-white">Xác Nhận Xóa</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <h3 className="font-black text-base uppercase text-slate-900">Xác Nhận Xóa</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
                 Bạn chắc chắn muốn xóa<br />
-                <span className="font-bold text-white">"{getName(selected)}"</span>?<br />
-                <span className="text-red-400">Hành động này không thể hoàn tác.</span>
+                <span className="font-bold text-slate-900">"{getName(selected)}"</span>?<br />
+                <span className="text-red-600">Hành động này không thể hoàn tác.</span>
               </p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={closeModal}
-                className="flex-1 py-2.5 bg-zinc-800 text-zinc-300 font-bold text-xs rounded-xl hover:bg-zinc-700 transition"
+                className="flex-1 py-2.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-200 transition"
               >
                 Hủy
               </button>
@@ -534,9 +534,9 @@ export default function AdminAttribute({ isAdmin }) {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="pb-3 border-b border-zinc-800">
-        <h2 className="text-lg font-black uppercase text-white">Quản Lý Thuộc Tính</h2>
-        <p className="text-xs text-zinc-500 mt-0.5">Quản lý các thuộc tính dùng cho sản phẩm</p>
+      <div className="pb-3 border-b border-slate-200">
+        <h2 className="text-lg font-black uppercase text-slate-900">Quản Lý Thuộc Tính</h2>
+        <p className="text-xs text-slate-500 mt-0.5">Quản lý các thuộc tính dùng cho sản phẩm</p>
       </div>
 
       {/* Sub-tabs */}
@@ -548,7 +548,7 @@ export default function AdminAttribute({ isAdmin }) {
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
               activeAttr === c.key
                 ? 'bg-[#c6f500] text-black shadow'
-                : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600'
+                : 'bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
             <span>{c.icon}</span>

@@ -69,7 +69,7 @@ export default function BillK80Modal({ bill, session, onClose }) {
       </div>
       <div className="absolute bottom-6 flex gap-3 print:hidden">
         <button onClick={() => window.print()} className="px-5 py-2.5 bg-[#c6f500] text-black font-black text-xs rounded-xl">🖨️ In Bill K80</button>
-        <button onClick={onClose} className="px-5 py-2.5 bg-zinc-800 text-white font-bold text-xs rounded-xl">Đóng</button>
+        <button onClick={onClose} className="px-5 py-2.5 bg-slate-100 text-slate-900 font-bold text-xs rounded-xl">Đóng</button>
       </div>
     </div>
   );

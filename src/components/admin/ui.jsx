@@ -54,8 +54,8 @@ export function PageHeader({ title, subtitle, action }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-white">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-zinc-400">{subtitle}</p>}
+        <h1 className="text-2xl font-black tracking-tight text-slate-900">{title}</h1>
+        {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -75,7 +75,7 @@ export function PrimaryButton({ icon, children, className = '', ...props }) {
 export function GhostButton({ icon, children, className = '', ...props }) {
   return (
     <button type="button" {...props}
-      className={`inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl border border-zinc-700 text-sm font-semibold text-zinc-200 hover:bg-zinc-900 transition disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c6f500]/60 ${className}`}>
+      className={`inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl border border-slate-300 text-sm font-semibold text-slate-800 hover:bg-slate-50 transition disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c6f500]/60 ${className}`}>
       {icon && <Icon name={icon} />}
       {children}
     </button>
@@ -83,19 +83,19 @@ export function GhostButton({ icon, children, className = '', ...props }) {
 }
 
 // ── KPI ──────────────────────────────────────────────────────────────────────
-const TONE_TEXT = { lime: 'text-[#c6f500]', green: 'text-emerald-400', red: 'text-red-400', zinc: 'text-zinc-400' };
+const TONE_TEXT = { lime: 'text-lime-700', green: 'text-emerald-600', red: 'text-red-600', zinc: 'text-slate-500' };
 
 export function KpiCard({ label, value, hint, icon, tone = 'zinc', highlight = false }) {
   return (
-    <div className="rounded-2xl p-5 border border-zinc-800 bg-zinc-950">
+    <div className="rounded-2xl p-5 border border-slate-200 bg-white">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 font-mono">{label}</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">{label}</p>
         <span className={TONE_TEXT[tone]}><Icon name={icon} /></span>
       </div>
-      <p className={`mt-2 text-3xl font-black tabular-nums ${highlight ? 'text-[#c6f500]' : 'text-white'}`}>
-        {value == null ? <span className="inline-block w-12 h-7 rounded bg-zinc-800 animate-pulse" /> : value.toLocaleString('vi-VN')}
+      <p className={`mt-2 text-3xl font-black tabular-nums ${highlight ? 'text-lime-700' : 'text-slate-900'}`}>
+        {value == null ? <span className="inline-block w-12 h-7 rounded bg-slate-100 animate-pulse" /> : value.toLocaleString('vi-VN')}
       </p>
-      {hint && <p className="mt-1.5 text-xs text-zinc-400">{hint}</p>}
+      {hint && <p className="mt-1.5 text-xs text-slate-500">{hint}</p>}
     </div>
   );
 }
@@ -105,23 +105,23 @@ export const percent = (part, total) => (total ? `${((part * 100) / total).toFix
 // ── Badge trạng thái ─────────────────────────────────────────────────────────
 export function StatusBadge({ active }) {
   return active ? (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30">
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold text-emerald-600 bg-emerald-500/10 border border-emerald-500/30">
       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />Hoạt động
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold text-red-400 bg-red-500/10 border border-red-500/30">
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold text-red-600 bg-red-500/10 border border-red-500/30">
       <span className="w-1.5 h-1.5 rounded-full bg-red-400" />Đã khóa
     </span>
   );
 }
 
 export function IconButton({ icon, label, tone = 'default', disabled, title, ...props }) {
-  const color = tone === 'danger' ? 'text-red-400 hover:bg-red-500/10' : 'text-zinc-400 hover:text-white hover:bg-zinc-800';
+  const color = tone === 'danger' ? 'text-red-600 hover:bg-red-500/10' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100';
   return (
     <button type="button" aria-label={label} title={title || label} aria-disabled={disabled || undefined}
       {...props}
       onClick={disabled ? undefined : props.onClick}
-      className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c6f500]/60 ${disabled ? 'opacity-30 cursor-not-allowed text-zinc-500' : color}`}>
+      className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c6f500]/60 ${disabled ? 'opacity-30 cursor-not-allowed text-slate-500' : color}`}>
       <Icon name={icon} />
     </button>
   );
@@ -131,23 +131,23 @@ export function IconButton({ icon, label, tone = 'default', disabled, title, ...
 // Không gắn sẵn w-full: nếu caller truyền w-28/w-36 thì hai class width cùng lúc sẽ xung đột (thứ tự CSS quyết định)
 const widthOf = (className) => (/(^|\s)w-/.test(className) ? '' : 'w-full');
 const inputCls = (error) =>
-  `h-10 rounded-lg border bg-black px-3 text-sm text-white placeholder:text-zinc-600 outline-none transition focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed read-only:bg-zinc-900 read-only:text-zinc-400 ${
-    error ? 'border-red-500 focus:ring-red-500/30' : 'border-zinc-800 focus:border-[#c6f500] focus:ring-[#c6f500]/20'
+  `h-10 rounded-lg border bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed read-only:bg-slate-50 read-only:text-slate-500 ${
+    error ? 'border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-[#c6f500] focus:ring-[#c6f500]/20'
   }`;
 
 export function Field({ id, label, required, error, help, children }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-xs font-medium text-zinc-400">
-        {label} {required && <span className="text-red-400" aria-hidden="true">*</span>}
+      <label htmlFor={id} className="mb-1.5 block text-xs font-medium text-slate-500">
+        {label} {required && <span className="text-red-600" aria-hidden="true">*</span>}
       </label>
       {children}
       {error ? (
-        <p id={`${id}-err`} className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-400">
+        <p id={`${id}-err`} className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600">
           <Icon name="alert" className="w-3.5 h-3.5 shrink-0" />{error}
         </p>
       ) : help ? (
-        <p className="mt-1.5 text-xs text-zinc-500">{help}</p>
+        <p className="mt-1.5 text-xs text-slate-500">{help}</p>
       ) : null}
     </div>
   );
@@ -174,8 +174,8 @@ export function Switch({ checked, onChange, disabled, label, title, labelledBy, 
       aria-labelledby={labelledBy} aria-describedby={describedBy}
       aria-disabled={disabled || undefined} onClick={disabled ? undefined : () => onChange(!checked)}
       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c6f500]/60 ${
-        checked ? 'bg-[#c6f500]' : 'bg-zinc-700'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-      <span className={`inline-block h-5 w-5 rounded-full bg-black transition-transform ${checked ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+        checked ? 'bg-[#c6f500]' : 'bg-slate-200'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+      <span className={`inline-block h-5 w-5 rounded-full bg-white transition-transform ${checked ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
     </button>
   );
 }
@@ -198,13 +198,13 @@ export function Modal({ open, title, onClose, children, footer, onSubmit }) {
       <form role="dialog" aria-modal="true" aria-labelledby="modal-title" noValidate
         onMouseDown={(e) => e.stopPropagation()}
         onSubmit={(e) => { e.preventDefault(); onSubmit?.(); }}
-        className="w-full max-w-xl rounded-2xl border border-zinc-700 bg-zinc-950 shadow-2xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-          <h2 id="modal-title" className="text-base font-bold text-white">{title}</h2>
+        className="w-full max-w-xl rounded-2xl border border-slate-300 bg-white shadow-2xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+          <h2 id="modal-title" className="text-base font-bold text-slate-900">{title}</h2>
           <IconButton icon="x" label="Đóng" onClick={onClose} />
         </div>
         <div className="px-5 py-5">{children}</div>
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-zinc-800">{footer}</div>
+        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-200">{footer}</div>
       </form>
     </div>
   );
@@ -220,14 +220,14 @@ export function ConfirmDialog({ open, tone = 'danger', icon = 'alert', title, de
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onMouseDown={onCancel}>
       <div role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-desc"
         onMouseDown={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-950 p-5 shadow-2xl">
+        className="w-full max-w-md rounded-2xl border border-slate-300 bg-white p-5 shadow-2xl">
         <div className="flex gap-4">
-          <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${danger ? 'text-red-400 bg-red-500/15' : 'text-amber-400 bg-amber-500/15'}`}>
+          <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${danger ? 'text-red-600 bg-red-500/15' : 'text-amber-600 bg-amber-500/15'}`}>
             <Icon name={icon} className="w-5 h-5" />
           </span>
           <div>
-            <h2 id="confirm-title" className="text-base font-bold text-white">{title}</h2>
-            <p id="confirm-desc" className="mt-1.5 text-sm text-zinc-400">{description}</p>
+            <h2 id="confirm-title" className="text-base font-bold text-slate-900">{title}</h2>
+            <p id="confirm-desc" className="mt-1.5 text-sm text-slate-500">{description}</p>
           </div>
         </div>
         <div className="mt-5 flex justify-end gap-2">
@@ -261,9 +261,9 @@ export function Toast({ toast }) {
   const ok = toast.type === 'success';
   return (
     <div role="status" aria-live="polite" className="fixed bottom-6 right-6 z-[60]">
-      <div className={`flex items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 shadow-2xl border-l-4 ${ok ? 'border-l-emerald-400' : 'border-l-red-400'}`}>
-        <span className={ok ? 'text-emerald-400' : 'text-red-400'}><Icon name={ok ? 'check' : 'alert'} className="w-5 h-5" /></span>
-        <p className="text-sm font-medium text-white">{toast.message}</p>
+      <div className={`flex items-center gap-3 rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 shadow-2xl border-l-4 ${ok ? 'border-l-emerald-400' : 'border-l-red-400'}`}>
+        <span className={ok ? 'text-emerald-600' : 'text-red-600'}><Icon name={ok ? 'check' : 'alert'} className="w-5 h-5" /></span>
+        <p className="text-sm font-medium text-slate-900">{toast.message}</p>
       </div>
     </div>
   );
@@ -273,17 +273,17 @@ export function Toast({ toast }) {
 export function TableStateRow({ colSpan, state, error, onRetry, emptyText }) {
   if (state === 'loading') {
     return Array.from({ length: 5 }).map((_, i) => (
-      <tr key={i} className="border-t border-zinc-800/80">
-        <td colSpan={colSpan} className="px-4 py-4"><div className="h-4 rounded bg-zinc-800/80 animate-pulse" /></td>
+      <tr key={i} className="border-t border-slate-200/80">
+        <td colSpan={colSpan} className="px-4 py-4"><div className="h-4 rounded bg-slate-100/80 animate-pulse" /></td>
       </tr>
     ));
   }
   return (
     <tr>
       <td colSpan={colSpan} className="px-4 py-14 text-center">
-        <div className="mx-auto flex max-w-sm flex-col items-center gap-3 text-zinc-400">
-          <Icon name={state === 'error' ? 'alert' : 'searchX'} className={`w-8 h-8 ${state === 'error' ? 'text-red-400' : 'text-zinc-600'}`} />
-          <p className="text-sm font-semibold text-zinc-300">{state === 'error' ? 'Lỗi tải dữ liệu' : emptyText}</p>
+        <div className="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-500">
+          <Icon name={state === 'error' ? 'alert' : 'searchX'} className={`w-8 h-8 ${state === 'error' ? 'text-red-600' : 'text-slate-400'}`} />
+          <p className="text-sm font-semibold text-slate-700">{state === 'error' ? 'Lỗi tải dữ liệu' : emptyText}</p>
           {state === 'error' && <p className="text-xs">{error}</p>}
           {state === 'error' && <GhostButton icon="refresh" onClick={onRetry}>Thử lại</GhostButton>}
         </div>
@@ -300,25 +300,25 @@ export function Pagination({ page, size, totalElements, totalPages, unit, onPage
   for (let p = Math.max(1, page - 2); p <= Math.min(totalPages, page + 2); p++) pages.push(p);
   const btn = 'inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition';
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-zinc-800 text-xs text-zinc-400">
-      <p>Hiển thị <b className="text-zinc-200">{from}–{to}</b> của <b className="text-zinc-200">{totalElements.toLocaleString('vi-VN')}</b> {unit}</p>
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 text-xs text-slate-500">
+      <p>Hiển thị <b className="text-slate-800">{from}–{to}</b> của <b className="text-slate-800">{totalElements.toLocaleString('vi-VN')}</b> {unit}</p>
       <div className="flex items-center gap-3">
         <label className="flex items-center gap-2">
           <span>Số dòng/trang</span>
           <select value={size} onChange={(e) => onSize(Number(e.target.value))}
-            className="h-8 rounded-lg border border-zinc-800 bg-black px-2 text-xs text-white">
+            className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-900">
             {[10, 20, 50].map((n) => <option key={n} value={n}>{n}</option>)}
           </select>
         </label>
         <nav className="flex items-center gap-1" aria-label="Phân trang">
           <button type="button" aria-label="Trang trước" disabled={page <= 1} onClick={() => onPage(page - 1)}
-            className={`${btn} text-zinc-400 hover:bg-zinc-800 disabled:opacity-30`}><Icon name="chevLeft" /></button>
+            className={`${btn} text-slate-500 hover:bg-slate-100 disabled:opacity-30`}><Icon name="chevLeft" /></button>
           {pages.map((p) => (
             <button key={p} type="button" aria-label={`Trang ${p}`} aria-current={p === page ? 'page' : undefined} onClick={() => onPage(p)}
-              className={`${btn} ${p === page ? 'bg-[#c6f500] text-black' : 'text-zinc-300 hover:bg-zinc-800'}`}>{p}</button>
+              className={`${btn} ${p === page ? 'bg-[#c6f500] text-black' : 'text-slate-700 hover:bg-slate-100'}`}>{p}</button>
           ))}
           <button type="button" aria-label="Trang sau" disabled={page >= totalPages} onClick={() => onPage(page + 1)}
-            className={`${btn} text-zinc-400 hover:bg-zinc-800 disabled:opacity-30`}><Icon name="chevRight" /></button>
+            className={`${btn} text-slate-500 hover:bg-slate-100 disabled:opacity-30`}><Icon name="chevRight" /></button>
         </nav>
       </div>
     </div>

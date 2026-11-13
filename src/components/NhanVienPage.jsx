@@ -48,11 +48,11 @@ function serverFieldErrors(err) {
 }
 
 function VaiTroBadge({ vaiTro, muted }) {
-  if (!vaiTro) return <span className="text-zinc-500">—</span>;
+  if (!vaiTro) return <span className="text-slate-500">—</span>;
   const isAdmin = vaiTro.maVaiTro === 'ADMIN';
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold border ${
-      isAdmin ? 'text-[#c6f500] border-[#c6f500]/60' : 'text-zinc-300 border-zinc-700 bg-zinc-900'} ${muted ? 'opacity-60' : ''}`}>
+      isAdmin ? 'text-lime-700 border-[#c6f500]/60' : 'text-slate-700 border-slate-300 bg-slate-50'} ${muted ? 'opacity-60' : ''}`}>
       {isAdmin && <Icon name="shield" className="w-3 h-3" />}{vaiTro.tenVaiTro}
     </span>
   );
@@ -186,33 +186,33 @@ export default function NhanVienPage() {
       <section aria-label="Thống kê nhân viên" className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         <KpiCard label="Tổng nhân viên" value={stats?.tong} icon="idCard" hint="Tài khoản truy cập trang quản trị" />
         <KpiCard label="Đang hoạt động" value={stats?.hoatDong} icon="userCheck" tone="green"
-          hint={stats && <><b className="text-emerald-400 font-mono">{percent(stats.hoatDong, stats.tong)}</b> tổng số nhân viên</>} />
+          hint={stats && <><b className="text-emerald-600 font-mono">{percent(stats.hoatDong, stats.tong)}</b> tổng số nhân viên</>} />
         <KpiCard label="Đã khóa" value={stats?.daKhoa} icon="userX" tone="red"
-          hint={stats && <><b className="text-red-400 font-mono">{percent(stats.daKhoa, stats.tong)}</b> · không thể đăng nhập</>} />
+          hint={stats && <><b className="text-red-600 font-mono">{percent(stats.daKhoa, stats.tong)}</b> · không thể đăng nhập</>} />
         <KpiCard label="Quản trị viên" value={stats?.quanTriVien} icon="shield" tone="lime" highlight
-          hint={stats && <>Vai trò <b className="font-mono text-white">ADMIN</b> · {stats.tong - stats.quanTriVien} nhân viên bán hàng</>} />
+          hint={stats && <>Vai trò <b className="font-mono text-slate-900">ADMIN</b> · {stats.tong - stats.quanTriVien} nhân viên bán hàng</>} />
       </section>
 
-      <section aria-labelledby="nv-table-title" className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950">
+      <section aria-labelledby="nv-table-title" className="rounded-2xl overflow-hidden border border-slate-200 bg-white">
         <div className="flex items-center justify-between px-5 pt-5">
-          <h2 id="nv-table-title" className="text-base font-bold text-white">Danh sách nhân viên</h2>
-          <p className="text-xs text-zinc-500">Kết quả: <b className="text-zinc-200 font-mono">{data.totalElements.toLocaleString('vi-VN')}</b> nhân viên</p>
+          <h2 id="nv-table-title" className="text-base font-bold text-slate-900">Danh sách nhân viên</h2>
+          <p className="text-xs text-slate-500">Kết quả: <b className="text-slate-800 font-mono">{data.totalElements.toLocaleString('vi-VN')}</b> nhân viên</p>
         </div>
 
         <div className="flex flex-col lg:flex-row lg:items-center gap-3 px-5 py-4">
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"><Icon name="search" /></span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><Icon name="search" /></span>
             <label htmlFor="f-q" className="sr-only">Tìm kiếm nhân viên</label>
             <TextInput id="f-q" type="search" value={q} onChange={(e) => setQ(e.target.value)}
               placeholder="Tìm theo mã, họ tên, SĐT, email…" className="pl-9" />
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <label htmlFor="f-vt" className="text-xs text-zinc-400">Vai trò</label>
+            <label htmlFor="f-vt" className="text-xs text-slate-500">Vai trò</label>
             <SelectInput id="f-vt" value={searchParams.get('vaiTroId') || ''} onChange={(e) => updateParams({ vaiTroId: e.target.value })} className="w-40">
               <option value="">Tất cả</option>
               {vaiTros.map((v) => <option key={v.id} value={v.id}>{v.tenVaiTro}</option>)}
             </SelectInput>
-            <label htmlFor="f-tt" className="text-xs text-zinc-400">Trạng thái</label>
+            <label htmlFor="f-tt" className="text-xs text-slate-500">Trạng thái</label>
             <SelectInput id="f-tt" value={searchParams.get('trangThai') || ''} onChange={(e) => updateParams({ trangThai: e.target.value })} className="w-36">
               <option value="">Tất cả</option>
               <option value="true">Hoạt động</option>
@@ -225,7 +225,7 @@ export default function NhanVienPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <caption className="sr-only">Danh sách nhân viên, trang {params.page} trên {Math.max(data.totalPages, 1)}</caption>
-            <thead className="bg-zinc-900/60 text-[11px] uppercase tracking-wider text-zinc-400">
+            <thead className="bg-slate-50/60 text-[11px] uppercase tracking-wider text-slate-500">
               <tr>
                 <th scope="col" className="px-4 py-3 font-semibold">STT</th>
                 <th scope="col" className="px-4 py-3 font-semibold">Mã NV</th>
@@ -244,16 +244,16 @@ export default function NhanVienPage() {
               ) : data.content.map((nv, i) => {
                 const self = isSelf(nv);
                 return (
-                  <tr key={nv.id} className={`border-t border-zinc-800/80 hover:bg-zinc-900/60 ${nv.trangThai ? '' : 'text-zinc-500'}`}>
-                    <td className="px-4 py-3 text-zinc-500 text-xs">{(data.page - 1) * data.size + i + 1}</td>
-                    <td className="px-4 py-3 font-mono font-bold text-white">{nv.maNhanVien}</td>
+                  <tr key={nv.id} className={`border-t border-slate-200/80 hover:bg-slate-50/60 ${nv.trangThai ? '' : 'text-slate-500'}`}>
+                    <td className="px-4 py-3 text-slate-500 text-xs">{(data.page - 1) * data.size + i + 1}</td>
+                    <td className="px-4 py-3 font-mono font-bold text-slate-900">{nv.maNhanVien}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <span className={`w-7 h-7 shrink-0 rounded-full text-[11px] font-black flex items-center justify-center ${self ? 'bg-[#c6f500] text-black' : 'bg-zinc-800 text-zinc-300'}`}>
+                        <span className={`w-7 h-7 shrink-0 rounded-full text-[11px] font-black flex items-center justify-center ${self ? 'bg-[#c6f500] text-black' : 'bg-slate-100 text-slate-700'}`}>
                           {initialsOf(nv.hoTen)}
                         </span>
-                        <span className={`font-semibold ${nv.trangThai ? 'text-white' : ''}`}>{nv.hoTen}</span>
-                        {self && <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full border border-[#c6f500]/60 text-[#c6f500]">Bạn</span>}
+                        <span className={`font-semibold ${nv.trangThai ? 'text-slate-900' : ''}`}>{nv.hoTen}</span>
+                        {self && <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full border border-[#c6f500]/60 text-lime-700">Bạn</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3 font-mono">{nv.sdt || '—'}</td>
@@ -317,19 +317,19 @@ export default function NhanVienPage() {
             </SelectInput>
           </Field>
           <div>
-            <span className="mb-1.5 block text-xs font-medium text-zinc-400" aria-hidden="true">Trạng thái</span>
-            <div className="flex h-10 items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 px-3.5">
-              <p id="m-tt-label" className="text-sm font-medium text-white">{form.trangThai ? 'Hoạt động' : 'Đã khóa'}</p>
+            <span className="mb-1.5 block text-xs font-medium text-slate-500" aria-hidden="true">Trạng thái</span>
+            <div className="flex h-10 items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3.5">
+              <p id="m-tt-label" className="text-sm font-medium text-slate-900">{form.trangThai ? 'Hoạt động' : 'Đã khóa'}</p>
               <Switch checked={form.trangThai} disabled={editingSelf} onChange={(v) => setForm((f) => ({ ...f, trangThai: v }))}
                 labelledBy="m-tt-label" describedBy="m-tt-desc" />
             </div>
           </div>
-          <p id="m-tt-desc" className="sm:col-span-2 -mt-2 text-xs text-zinc-500">
+          <p id="m-tt-desc" className="sm:col-span-2 -mt-2 text-xs text-slate-500">
             {editingSelf ? 'Không thể khóa hoặc đổi vai trò của tài khoản đang đăng nhập'
               : form.trangThai ? 'Hoạt động — nhân viên có thể đăng nhập trang quản trị' : 'Đã khóa — nhân viên không thể đăng nhập'}
           </p>
           {modal?.mode === 'add' && (
-            <p className="sm:col-span-2 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-sky-300 bg-sky-500/10">
+            <p className="sm:col-span-2 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-sky-700 bg-sky-500/10">
               <Icon name="info" />Mật khẩu mặc định là <b className="font-mono">1</b> — nhân viên nên đổi sau lần đăng nhập đầu
             </p>
           )}

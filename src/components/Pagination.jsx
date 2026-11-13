@@ -8,7 +8,7 @@ function getPageNumbers(current, total, max = 5) {
     return Array.from({ length: end - start }, (_, i) => start + i);
 }
 
-const btn = 'px-2.5 py-1.5 bg-zinc-900 border border-zinc-700 text-zinc-300 rounded-lg font-bold disabled:opacity-40 hover:bg-zinc-800 transition';
+const btn = 'px-2.5 py-1.5 bg-slate-50 border border-slate-300 text-slate-700 rounded-lg font-bold disabled:opacity-40 hover:bg-slate-100 transition';
 
 export default function Pagination({ page, totalPages, pageSize, loading, onPage, onPageSize }) {
     if (totalPages <= 0) return null;
@@ -17,10 +17,10 @@ export default function Pagination({ page, totalPages, pageSize, loading, onPage
 
     return (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2 text-zinc-500">
+            <div className="flex items-center gap-2 text-slate-500">
                 <span>Hiển thị</span>
                 <select value={pageSize} onChange={(e) => onPageSize(Number(e.target.value))}
-                        className="bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-[#c6f500]">
+                        className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-900 focus:outline-none focus:border-[#c6f500]">
                     {[5, 10, 20, 50].map((n) => <option key={n} value={n}>{n}</option>)}
                 </select>
                 <span>/ trang · Trang {page + 1} / {totalPages}</span>
@@ -35,7 +35,7 @@ export default function Pagination({ page, totalPages, pageSize, loading, onPage
                             className={`w-8 h-8 rounded-lg font-bold border transition ${
                                 n === page
                                     ? 'bg-[#c6f500] text-black border-[#c6f500]'
-                                    : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                                    : 'bg-slate-50 border-slate-300 text-slate-700 hover:bg-slate-100'
                             }`}>
                         {n + 1}
                     </button>

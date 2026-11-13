@@ -136,30 +136,30 @@ export default function BanHangTaiKho({ session }) {
               placeholder="[F2/F3] Tìm tên giày, mã SP..."
               value={posSearch}
               onChange={(e) => setPosSearch(e.target.value)}
-              className="flex-1 bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-[#c6f500]"
+              className="flex-1 bg-white border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-900 focus:outline-none focus:border-[#c6f500]"
             />
           </div>
 
-          {posError && <div className="text-red-400 text-xs">{posError}</div>}
-          {posLoading && <div className="text-zinc-400 text-xs">Đang tải sản phẩm...</div>}
+          {posError && <div className="text-red-600 text-xs">{posError}</div>}
+          {posLoading && <div className="text-slate-500 text-xs">Đang tải sản phẩm...</div>}
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {posProducts.filter((p) => !posSearch || p.tenSanPham.toLowerCase().includes(posSearch.toLowerCase()) || (p.maSanPham || '').toLowerCase().includes(posSearch.toLowerCase())).map((p) => (
               <div
                 key={p.id}
                 onClick={() => openBienThe(p)}
-                className="bg-zinc-950 border border-zinc-800 hover:border-[#c6f500] rounded-2xl p-2.5 cursor-pointer transition flex flex-col justify-between"
+                className="bg-white border border-slate-200 hover:border-[#c6f500] rounded-2xl p-2.5 cursor-pointer transition flex flex-col justify-between"
               >
                 {/* Chưa có ảnh → placeholder, tránh ô img vỡ */}
                 {p.urlAnhChinh
-                  ? <img src={toSrc(p.urlAnhChinh)} className="w-full aspect-square rounded-xl object-cover bg-zinc-900 mb-2" />
-                  : <div className="w-full aspect-square rounded-xl bg-zinc-900 mb-2 flex items-center justify-center text-4xl">👟</div>}
+                  ? <img src={toSrc(p.urlAnhChinh)} className="w-full aspect-square rounded-xl object-cover bg-slate-50 mb-2" />
+                  : <div className="w-full aspect-square rounded-xl bg-slate-50 mb-2 flex items-center justify-center text-4xl">👟</div>}
                 <div>
-                  <div className="text-[10px] text-zinc-500 font-mono">{p.maSanPham}</div>
-                  <h4 className="font-bold text-xs text-white line-clamp-1">{p.tenSanPham}</h4>
+                  <div className="text-[10px] text-slate-500 font-mono">{p.maSanPham}</div>
+                  <h4 className="font-bold text-xs text-slate-900 line-clamp-1">{p.tenSanPham}</h4>
                   <div className="flex justify-between items-center mt-1">
-                    <span className="font-black text-xs text-[#c6f500]">{fmtMoney(p.giaBan)}</span>
-                    <span className="text-[10px] text-zinc-400">Tồn: {p.tongTonKho ?? 0}</span>
+                    <span className="font-black text-xs text-lime-700">{fmtMoney(p.giaBan)}</span>
+                    <span className="text-[10px] text-slate-500">Tồn: {p.tongTonKho ?? 0}</span>
                   </div>
                 </div>
               </div>
@@ -168,18 +168,18 @@ export default function BanHangTaiKho({ session }) {
         </div>
 
         {/* POS Bill Panel */}
-        <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 flex flex-col justify-between h-fit lg:h-full print:hidden">
+        <div className="bg-white border border-slate-200 rounded-3xl p-5 flex flex-col justify-between h-fit lg:h-full print:hidden">
           <div>
-            <div className="flex gap-2 border-b border-zinc-800 pb-3 mb-3">
+            <div className="flex gap-2 border-b border-slate-200 pb-3 mb-3">
               <button
                 onClick={() => setActiveBillTab(1)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${activeBillTab === 1 ? 'bg-[#c6f500] text-black' : 'bg-zinc-900 text-zinc-400'}`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${activeBillTab === 1 ? 'bg-[#c6f500] text-black' : 'bg-slate-50 text-slate-500'}`}
               >
                 Hóa Đơn 1 ({bill1.length})
               </button>
               <button
                 onClick={() => setActiveBillTab(2)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${activeBillTab === 2 ? 'bg-[#c6f500] text-black' : 'bg-zinc-900 text-zinc-400'}`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${activeBillTab === 2 ? 'bg-[#c6f500] text-black' : 'bg-slate-50 text-slate-500'}`}
               >
                 Hóa Đơn 2 ({bill2.length})
               </button>
@@ -187,22 +187,22 @@ export default function BanHangTaiKho({ session }) {
 
             <div className="space-y-2 max-h-[40vh] overflow-y-auto">
               {currentBill.length === 0 ? (
-                <div className="py-8 text-center text-zinc-500 text-xs">Hóa đơn đang trống. Click giày bên trái để thêm!</div>
+                <div className="py-8 text-center text-slate-500 text-xs">Hóa đơn đang trống. Click giày bên trái để thêm!</div>
               ) : (
                 currentBill.map((item, idx) => (
-                  <div key={idx} className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800 text-xs space-y-1">
+                  <div key={idx} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
                     <div className="flex justify-between">
-                      <span className="font-bold text-white line-clamp-1">{item.tenSanPham}</span>
-                      <button onClick={() => handleRemovePosItem(idx)} className="text-zinc-500 hover:text-red-400 font-bold ml-2">✕</button>
+                      <span className="font-bold text-slate-900 line-clamp-1">{item.tenSanPham}</span>
+                      <button onClick={() => handleRemovePosItem(idx)} className="text-slate-500 hover:text-red-600 font-bold ml-2">✕</button>
                     </div>
-                    <div className="flex justify-between text-zinc-400 text-[11px]">
+                    <div className="flex justify-between text-slate-500 text-[11px]">
                       <span>Size: {item.tenKichThuoc} • {item.tenMau}</span>
-                      <span className="font-bold text-[#c6f500]">{(item.donGia * item.qty).toLocaleString('vi-VN')}₫</span>
+                      <span className="font-bold text-lime-700">{(item.donGia * item.qty).toLocaleString('vi-VN')}₫</span>
                     </div>
                     <div className="flex items-center space-x-2 pt-1">
-                      <button onClick={() => handleUpdatePosQty(idx, -1)} className="w-5 h-5 bg-black rounded text-white">-</button>
+                      <button onClick={() => handleUpdatePosQty(idx, -1)} className="w-5 h-5 bg-white rounded text-slate-900">-</button>
                       <span className="font-bold">{item.qty}</span>
-                      <button onClick={() => handleUpdatePosQty(idx, 1)} className="w-5 h-5 bg-black rounded text-white">+</button>
+                      <button onClick={() => handleUpdatePosQty(idx, 1)} className="w-5 h-5 bg-white rounded text-slate-900">+</button>
                     </div>
                   </div>
                 ))
@@ -210,33 +210,33 @@ export default function BanHangTaiKho({ session }) {
             </div>
           </div>
 
-          <div className="border-t border-zinc-800 pt-4 space-y-3 mt-4">
+          <div className="border-t border-slate-200 pt-4 space-y-3 mt-4">
             <div className="text-xs space-y-1.5">
-              <div className="flex justify-between text-zinc-400">
+              <div className="flex justify-between text-slate-500">
                 <span>Tạm tính hàng:</span>
                 <span>{billSubtotal.toLocaleString('vi-VN')}₫</span>
               </div>
-              <div className="flex justify-between items-center text-zinc-400">
+              <div className="flex justify-between items-center text-slate-500">
                 <span>Giảm giá / Voucher:</span>
                 <input
                   type="number"
                   placeholder="0₫"
                   value={billDiscount || ''}
                   onChange={(e) => setBillDiscount(Number(e.target.value))}
-                  className="w-24 bg-black border border-zinc-800 rounded px-2 py-0.5 text-right text-xs text-[#c6f500]"
+                  className="w-24 bg-white border border-slate-200 rounded px-2 py-0.5 text-right text-xs text-lime-700"
                 />
               </div>
 
               {/* ── Phương thức thanh toán ── */}
               <div className="pt-2">
-                <label className="block text-zinc-300 font-bold mb-1.5">Phương thức thanh toán:</label>
+                <label className="block text-slate-700 font-bold mb-1.5">Phương thức thanh toán:</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setPhuongThuc('TIEN_MAT')}
                     className={`py-2 rounded-xl text-xs font-bold border transition ${
                       phuongThuc === 'TIEN_MAT'
                         ? 'bg-[#c6f500] text-black border-[#c6f500]'
-                        : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-600'
+                        : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     💵 Tiền mặt
@@ -246,7 +246,7 @@ export default function BanHangTaiKho({ session }) {
                     className={`py-2 rounded-xl text-xs font-bold border transition ${
                       phuongThuc === 'CHUYEN_KHOAN'
                         ? 'bg-[#c6f500] text-black border-[#c6f500]'
-                        : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-600'
+                        : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     🏦 Chuyển khoản
@@ -256,39 +256,39 @@ export default function BanHangTaiKho({ session }) {
 
               {phuongThuc === 'TIEN_MAT' ? (
                 <div className="space-y-1.5 pt-1">
-                  <div className="flex justify-between items-center text-zinc-400">
+                  <div className="flex justify-between items-center text-slate-500">
                     <span>Khách đưa:</span>
                     <input
                       type="number"
                       placeholder="0₫"
                       value={tienKhachDua}
                       onChange={(e) => setTienKhachDua(e.target.value)}
-                      className="w-28 bg-black border border-zinc-800 rounded px-2 py-0.5 text-right text-xs text-white"
+                      className="w-28 bg-white border border-slate-200 rounded px-2 py-0.5 text-right text-xs text-slate-900"
                     />
                   </div>
-                  <div className="flex justify-between text-zinc-400">
+                  <div className="flex justify-between text-slate-500">
                     <span>Tiền thối lại:</span>
-                    <span className={`font-bold ${tienThoi !== null ? 'text-[#c6f500]' : 'text-zinc-600'}`}>
+                    <span className={`font-bold ${tienThoi !== null ? 'text-lime-700' : 'text-slate-400'}`}>
                       {tienThoi !== null ? tienThoi.toLocaleString('vi-VN') + '₫' : '—'}
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="flex justify-between items-center text-zinc-400 pt-1">
+                <div className="flex justify-between items-center text-slate-500 pt-1">
                   <span>Mã giao dịch (tùy chọn):</span>
                   <input
                     type="text"
                     placeholder="FT123456..."
                     value={maGiaoDich}
                     onChange={(e) => setMaGiaoDich(e.target.value)}
-                    className="w-28 bg-black border border-zinc-800 rounded px-2 py-0.5 text-right text-xs text-white"
+                    className="w-28 bg-white border border-slate-200 rounded px-2 py-0.5 text-right text-xs text-slate-900"
                   />
                 </div>
               )}
 
-              <div className="flex justify-between text-base font-black text-white pt-2 border-t border-zinc-800">
+              <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-200">
                 <span>Khách Cần Trả:</span>
-                <span className="text-[#c6f500]">{billTotal.toLocaleString('vi-VN')}₫</span>
+                <span className="text-lime-700">{billTotal.toLocaleString('vi-VN')}₫</span>
               </div>
             </div>
 
@@ -306,13 +306,13 @@ export default function BanHangTaiKho({ session }) {
       {/* ── MODAL: BIẾN THỂ (chọn màu/size khi bán) ── */}
       {bienTheModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 print:hidden" onClick={() => setBienTheModal(null)}>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 w-full max-w-lg space-y-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-lg space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center">
-              <h3 className="font-black text-sm uppercase text-white">{bienTheModal.tenSanPham}</h3>
-              <button onClick={() => setBienTheModal(null)} className="text-zinc-400 hover:text-red-400 font-bold">✕</button>
+              <h3 className="font-black text-sm uppercase text-slate-900">{bienTheModal.tenSanPham}</h3>
+              <button onClick={() => setBienTheModal(null)} className="text-slate-500 hover:text-red-600 font-bold">✕</button>
             </div>
             {bienTheList.length === 0 ? (
-              <div className="text-zinc-400 text-xs py-6 text-center">Đang tải biến thể...</div>
+              <div className="text-slate-500 text-xs py-6 text-center">Đang tải biến thể...</div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 {bienTheList.map((bt) => (
@@ -322,17 +322,17 @@ export default function BanHangTaiKho({ session }) {
                     disabled={bt.soLuong <= 0}
                     className={`p-3 rounded-xl border text-left text-xs transition ${
                       bt.soLuong <= 0
-                        ? 'border-zinc-800 bg-zinc-900 text-zinc-600 cursor-not-allowed'
-                        : 'border-zinc-800 bg-zinc-900 hover:border-[#c6f500] text-white'
+                        ? 'border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed'
+                        : 'border-slate-200 bg-slate-50 hover:border-[#c6f500] text-slate-900'
                     }`}
                   >
                     <div className="flex items-center gap-1.5 font-bold">
-                      <span className="w-3 h-3 rounded-full inline-block border border-zinc-600" style={{ background: bt.maHex || '#555' }}></span>
+                      <span className="w-3 h-3 rounded-full inline-block border border-slate-300" style={{ background: bt.maHex || '#555' }}></span>
                       {bt.tenMau} • Size {bt.tenKichThuoc}
                     </div>
                     <div className="flex justify-between mt-1 text-[11px]">
-                      <span className="text-[#c6f500] font-black">{fmtMoney(bt.giaBan)}</span>
-                      <span className={bt.soLuong <= 0 ? 'text-red-400' : 'text-zinc-400'}>Tồn: {bt.soLuong}</span>
+                      <span className="text-lime-700 font-black">{fmtMoney(bt.giaBan)}</span>
+                      <span className={bt.soLuong <= 0 ? 'text-red-600' : 'text-slate-500'}>Tồn: {bt.soLuong}</span>
                     </div>
                   </button>
                 ))}

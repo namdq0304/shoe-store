@@ -153,33 +153,33 @@ export default function KhachHangPage() {
       <section aria-label="Thống kê khách hàng" className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         <KpiCard label="Tổng khách hàng" value={stats?.tong} icon="users" hint="Tất cả tài khoản đã đăng ký" />
         <KpiCard label="Đang hoạt động" value={stats?.hoatDong} icon="userCheck" tone="green"
-          hint={stats && <><b className="text-emerald-400 font-mono">{percent(stats.hoatDong, stats.tong)}</b> tổng số khách hàng</>} />
+          hint={stats && <><b className="text-emerald-600 font-mono">{percent(stats.hoatDong, stats.tong)}</b> tổng số khách hàng</>} />
         <KpiCard label="Đã khóa" value={stats?.daKhoa} icon="userX" tone="red"
-          hint={stats && <><b className="text-red-400 font-mono">{percent(stats.daKhoa, stats.tong)}</b> tổng số khách hàng</>} />
+          hint={stats && <><b className="text-red-600 font-mono">{percent(stats.daKhoa, stats.tong)}</b> tổng số khách hàng</>} />
         <KpiCard label="Mới trong tháng" value={stats?.moiTrongThang} icon="userPlus" tone="lime" highlight hint="Đăng ký từ đầu tháng này" />
       </section>
 
-      <section aria-labelledby="kh-table-title" className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950">
+      <section aria-labelledby="kh-table-title" className="rounded-2xl overflow-hidden border border-slate-200 bg-white">
         <div className="flex items-center justify-between px-5 pt-5">
-          <h2 id="kh-table-title" className="text-base font-bold text-white">Danh sách khách hàng</h2>
-          <p className="text-xs text-zinc-500">Kết quả: <b className="text-zinc-200 font-mono">{data.totalElements.toLocaleString('vi-VN')}</b> khách hàng</p>
+          <h2 id="kh-table-title" className="text-base font-bold text-slate-900">Danh sách khách hàng</h2>
+          <p className="text-xs text-slate-500">Kết quả: <b className="text-slate-800 font-mono">{data.totalElements.toLocaleString('vi-VN')}</b> khách hàng</p>
         </div>
 
         <div className="flex flex-col lg:flex-row lg:items-center gap-3 px-5 py-4">
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"><Icon name="search" /></span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><Icon name="search" /></span>
             <label htmlFor="f-q" className="sr-only">Tìm kiếm khách hàng</label>
             <TextInput id="f-q" type="search" value={q} onChange={(e) => setQ(e.target.value)}
               placeholder="Tìm theo mã, họ tên, SĐT, email…" className="pl-9" />
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <label htmlFor="f-gt" className="text-xs text-zinc-400">Giới tính</label>
+            <label htmlFor="f-gt" className="text-xs text-slate-500">Giới tính</label>
             <SelectInput id="f-gt" value={searchParams.get('gioiTinh') || ''} onChange={(e) => updateParams({ gioiTinh: e.target.value })} className="w-28">
               <option value="">Tất cả</option>
               <option value="true">Nam</option>
               <option value="false">Nữ</option>
             </SelectInput>
-            <label htmlFor="f-tt" className="text-xs text-zinc-400">Trạng thái</label>
+            <label htmlFor="f-tt" className="text-xs text-slate-500">Trạng thái</label>
             <SelectInput id="f-tt" value={searchParams.get('trangThai') || ''} onChange={(e) => updateParams({ trangThai: e.target.value })} className="w-36">
               <option value="">Tất cả</option>
               <option value="true">Hoạt động</option>
@@ -192,7 +192,7 @@ export default function KhachHangPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <caption className="sr-only">Danh sách khách hàng, trang {params.page} trên {Math.max(data.totalPages, 1)}</caption>
-            <thead className="bg-zinc-900/60 text-[11px] uppercase tracking-wider text-zinc-400">
+            <thead className="bg-slate-50/60 text-[11px] uppercase tracking-wider text-slate-500">
               <tr>
                 <th scope="col" className="px-4 py-3 font-semibold">STT</th>
                 <th scope="col" className="px-4 py-3 font-semibold">Mã KH</th>
@@ -210,10 +210,10 @@ export default function KhachHangPage() {
                 <TableStateRow colSpan={cols} state={state === 'ready' ? 'empty' : state} error={error} onRetry={reload}
                   emptyText="Không tìm thấy khách hàng phù hợp" />
               ) : data.content.map((kh, i) => (
-                <tr key={kh.id} className={`border-t border-zinc-800/80 hover:bg-zinc-900/60 ${kh.trangThai ? '' : 'text-zinc-500'}`}>
-                  <td className="px-4 py-3 text-zinc-500 text-xs">{(data.page - 1) * data.size + i + 1}</td>
-                  <td className="px-4 py-3 font-mono font-bold text-white">{kh.maKhachHang}</td>
-                  <td className={`px-4 py-3 font-semibold ${kh.trangThai ? 'text-white' : ''}`}>{kh.hoTen}</td>
+                <tr key={kh.id} className={`border-t border-slate-200/80 hover:bg-slate-50/60 ${kh.trangThai ? '' : 'text-slate-500'}`}>
+                  <td className="px-4 py-3 text-slate-500 text-xs">{(data.page - 1) * data.size + i + 1}</td>
+                  <td className="px-4 py-3 font-mono font-bold text-slate-900">{kh.maKhachHang}</td>
+                  <td className={`px-4 py-3 font-semibold ${kh.trangThai ? 'text-slate-900' : ''}`}>{kh.hoTen}</td>
                   <td className="px-4 py-3 font-mono">{kh.sdt || '—'}</td>
                   <td className="px-4 py-3">{kh.email || '—'}</td>
                   <td className="px-4 py-3 font-mono">{formatDate(kh.ngaySinh)}</td>
@@ -270,7 +270,7 @@ export default function KhachHangPage() {
               error={errors.ngaySinh} className="font-mono [color-scheme:dark]" />
           </Field>
           <fieldset>
-            <legend className="mb-1.5 block text-xs font-medium text-zinc-400">Giới tính</legend>
+            <legend className="mb-1.5 block text-xs font-medium text-slate-500">Giới tính</legend>
             <div className="flex h-10 items-center gap-5 text-sm">
               {[[true, 'Nam'], [false, 'Nữ']].map(([val, text]) => (
                 <label key={text} className="inline-flex items-center gap-2 cursor-pointer">
@@ -283,16 +283,16 @@ export default function KhachHangPage() {
           </fieldset>
           {modal?.mode === 'add' && (
             <>
-              <div className="sm:col-span-2 flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 px-3.5 py-3">
+              <div className="sm:col-span-2 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-3">
                 <div>
-                  <p id="m-tt-label" className="text-sm font-medium text-white">Trạng thái tài khoản</p>
-                  <p id="m-tt-desc" className="text-xs text-zinc-500">
+                  <p id="m-tt-label" className="text-sm font-medium text-slate-900">Trạng thái tài khoản</p>
+                  <p id="m-tt-desc" className="text-xs text-slate-500">
                     {form.trangThai ? 'Hoạt động — khách có thể đăng nhập và đặt hàng' : 'Đã khóa — khách không thể đăng nhập'}
                   </p>
                 </div>
                 <Switch checked={form.trangThai} onChange={(v) => setForm((f) => ({ ...f, trangThai: v }))} labelledBy="m-tt-label" describedBy="m-tt-desc" />
               </div>
-              <p className="sm:col-span-2 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-sky-300 bg-sky-500/10">
+              <p className="sm:col-span-2 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-sky-700 bg-sky-500/10">
                 <Icon name="info" />Mật khẩu mặc định là <b className="font-mono">1</b> — khách nên đổi sau lần đăng nhập đầu
               </p>
             </>

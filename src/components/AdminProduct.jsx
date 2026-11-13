@@ -167,10 +167,10 @@ export default function AdminProduct({ isAdmin }) {
         <div className="space-y-4">
 
             {/* ── Header ── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
                 <div>
-                    <h2 className="text-lg font-black uppercase text-white">Quản Lý Sản Phẩm</h2>
-                    <p className="text-xs text-zinc-500 mt-0.5">
+                    <h2 className="text-lg font-black uppercase text-slate-900">Quản Lý Sản Phẩm</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
                         {filteredProducts.length} / {totalElements} sản phẩm
                     </p>
                 </div>
@@ -187,7 +187,7 @@ export default function AdminProduct({ isAdmin }) {
             {/* ── Toolbar ── */}
             <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
                     </svg>
                     <input
@@ -195,13 +195,13 @@ export default function AdminProduct({ isAdmin }) {
                         placeholder="Tìm tên, mã sản phẩm..."
                         value={prodSearch}
                         onChange={(e) => setProdSearch(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-8 pr-4 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#c6f500] transition"
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#c6f500] transition"
                     />
                 </div>
                 <select
                     value={prodBrandFilter}
                     onChange={(e) => { setProdBrandFilter(e.target.value); setPage(0); }}
-                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#c6f500] transition"
+                    className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#c6f500] transition"
                 >
                     <option value="all">Tất cả thương hiệu</option>
                     {brands.map((b) => <option key={b.id} value={b.id}>{b.tenThuongHieu}</option>)}
@@ -209,7 +209,7 @@ export default function AdminProduct({ isAdmin }) {
                 <select
                     value={prodStockFilter}
                     onChange={(e) => setProdStockFilter(e.target.value)}
-                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#c6f500] transition"
+                    className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#c6f500] transition"
                 >
                     <option value="all">Tất cả tồn kho</option>
                     <option value="low">Sắp hết (≤ 10)</option>
@@ -218,7 +218,7 @@ export default function AdminProduct({ isAdmin }) {
                 <button
                     onClick={fetchProducts}
                     disabled={prodLoading}
-                    className="px-3 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold rounded-xl transition disabled:opacity-50"
+                    className="px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold rounded-xl transition disabled:opacity-50"
                     title="Tải lại"
                 >
                     {prodLoading ? '⏳' : '🔄'}
@@ -227,17 +227,17 @@ export default function AdminProduct({ isAdmin }) {
 
             {/* Lỗi API */}
             {prodError && (
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-xs flex items-center gap-2">
                     <span>⚠️</span><span>{prodError}</span>
-                    <button onClick={() => setProdError('')} className="ml-auto font-bold hover:text-white">✕</button>
+                    <button onClick={() => setProdError('')} className="ml-auto font-bold hover:text-slate-900">✕</button>
                 </div>
             )}
 
             {/* ── Table ── */}
-            <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-xs text-left">
-                        <thead className="bg-zinc-900 border-b border-zinc-800 text-zinc-400 uppercase tracking-wide">
+                        <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wide">
                         <tr>
                             <th className="px-4 py-3 font-bold w-16">Ảnh</th>
                             <th className="px-4 py-3 font-bold">Tên / Mã</th>
@@ -249,12 +249,12 @@ export default function AdminProduct({ isAdmin }) {
                             <th className="px-4 py-3 font-bold text-center">Hành Động</th>
                         </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-800/60">
+                        <tbody className="divide-y divide-slate-200/60">
 
                         {prodLoading && products.length === 0 && (
                             <tr>
                                 <td colSpan={COLS} className="px-4 py-12 text-center">
-                                    <div className="flex items-center justify-center gap-2 text-zinc-500">
+                                    <div className="flex items-center justify-center gap-2 text-slate-500">
                                         <div className="w-4 h-4 border-2 border-[#c6f500] border-t-transparent rounded-full animate-spin" />
                                         <span>Đang tải sản phẩm...</span>
                                     </div>
@@ -264,7 +264,7 @@ export default function AdminProduct({ isAdmin }) {
 
                         {!prodLoading && filteredProducts.length === 0 && (
                             <tr>
-                                <td colSpan={COLS} className="px-4 py-12 text-center text-zinc-500">
+                                <td colSpan={COLS} className="px-4 py-12 text-center text-slate-500">
                                     {products.length === 0
                                         ? 'Chưa có sản phẩm nào. Bấm "+ Thêm Sản Phẩm" để bắt đầu.'
                                         : 'Không có sản phẩm phù hợp với bộ lọc tồn kho.'}
@@ -282,44 +282,44 @@ export default function AdminProduct({ isAdmin }) {
                             const imgSrc = toSrc(p.anhChinhUrl);
 
                             return (
-                                <tr key={p.id} className="hover:bg-zinc-900/40 transition">
+                                <tr key={p.id} className="hover:bg-slate-50/40 transition">
                                     {/* Ảnh */}
                                     <td className="px-4 py-3">
                                         {imgSrc
-                                            ? <img src={imgSrc} alt={name} className="w-12 h-12 rounded-xl object-cover bg-zinc-900" />
-                                            : <div className="w-12 h-12 rounded-xl bg-zinc-900 flex items-center justify-center text-xl">👟</div>}
+                                            ? <img src={imgSrc} alt={name} className="w-12 h-12 rounded-xl object-cover bg-slate-50" />
+                                            : <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-xl">👟</div>}
                                     </td>
 
                                     {/* Tên / Mã */}
                                     <td className="px-4 py-3">
-                                        <div className="font-bold text-white line-clamp-1 max-w-[200px]">{name}</div>
-                                        <div className="text-zinc-500 font-mono mt-0.5">{p.maSanPham}</div>
+                                        <div className="font-bold text-slate-900 line-clamp-1 max-w-[200px]">{name}</div>
+                                        <div className="text-slate-500 font-mono mt-0.5">{p.maSanPham}</div>
                                     </td>
 
                                     {/* Thương hiệu */}
                                     <td className="px-4 py-3">
-                                        <span className="px-2 py-0.5 rounded-lg bg-zinc-800 text-zinc-300 font-bold">{brand}</span>
+                                        <span className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 font-bold">{brand}</span>
                                     </td>
 
                                     {/* Chất liệu */}
                                     <td className="px-4 py-3">
-                                        <span className="px-2 py-0.5 rounded-lg bg-zinc-800 text-zinc-300 font-bold">{chatLieu}</span>
+                                        <span className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 font-bold">{chatLieu}</span>
                                     </td>
 
                                     {/* Giá bán */}
                                     <td className="px-4 py-3 text-right">
-                                        <div className="font-black text-[#c6f500]">{fmtMoney(price)}</div>
+                                        <div className="font-black text-lime-700">{fmtMoney(price)}</div>
                                         {giaGoc && giaGoc > price && (
-                                            <div className="text-zinc-500 line-through text-[10px]">{fmtMoney(giaGoc)}</div>
+                                            <div className="text-slate-500 line-through text-[10px]">{fmtMoney(giaGoc)}</div>
                                         )}
                                     </td>
 
                                     {/* Tồn kho */}
                                     <td className="px-4 py-3 text-center">
                                             <span className={`px-2.5 py-1 rounded-lg font-black text-[11px] ${
-                                                stock === 0 ? 'bg-red-500/15 text-red-400'
-                                                    : stock <= 10 ? 'bg-amber-400/15 text-amber-400'
-                                                        : 'bg-[#c6f500]/15 text-[#c6f500]'
+                                                stock === 0 ? 'bg-red-500/15 text-red-600'
+                                                    : stock <= 10 ? 'bg-amber-400/15 text-amber-600'
+                                                        : 'bg-[#c6f500]/15 text-lime-700'
                                             }`}>
                                                 {stock === 0 ? 'Hết hàng' : `${stock} đôi`}
                                             </span>
@@ -330,9 +330,9 @@ export default function AdminProduct({ isAdmin }) {
                                         <button
                                             onClick={() => handleToggleStatus(p)}
                                             disabled={togglingId === p.id}
-                                            className={`relative w-10 h-5 rounded-full transition ${p.trangThai ? 'bg-[#c6f500]' : 'bg-zinc-700'}`}
+                                            className={`relative w-10 h-5 rounded-full transition ${p.trangThai ? 'bg-[#c6f500]' : 'bg-slate-200'}`}
                                         >
-    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-black transition-transform ${
+    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
         p.trangThai ? 'translate-x-5' : ''
     }`} />
                                         </button>
@@ -344,7 +344,7 @@ export default function AdminProduct({ isAdmin }) {
                                             {isAdmin && (
                                                 <button
                                                     onClick={() => openEdit(p)}
-                                                    className="px-3 py-1.5 bg-zinc-900 hover:bg-[#c6f500]/10 border border-zinc-700 hover:border-[#c6f500]/50 text-[#c6f500] text-[10px] font-bold rounded-lg transition"
+                                                    className="px-3 py-1.5 bg-slate-50 hover:bg-[#c6f500]/10 border border-slate-300 hover:border-[#c6f500]/50 text-lime-700 text-[10px] font-bold rounded-lg transition"
                                                 >
                                                     ✏️ Sửa
                                                 </button>
@@ -352,7 +352,7 @@ export default function AdminProduct({ isAdmin }) {
                                             {/*{isAdmin && (*/}
                                             {/*    <button*/}
                                             {/*        onClick={() => openDelete(p)}*/}
-                                            {/*        className="px-2.5 py-1.5 bg-zinc-900 hover:bg-red-500/10 border border-zinc-700 hover:border-red-500/40 text-zinc-500 hover:text-red-400 text-[10px] font-bold rounded-lg transition"*/}
+                                            {/*        className="px-2.5 py-1.5 bg-slate-50 hover:bg-red-500/10 border border-slate-300 hover:border-red-500/40 text-slate-500 hover:text-red-600 text-[10px] font-bold rounded-lg transition"*/}
                                             {/*    >*/}
                                             {/*        🗑️*/}
                                             {/*    </button>*/}

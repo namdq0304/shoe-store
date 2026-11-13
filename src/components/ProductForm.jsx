@@ -26,12 +26,12 @@ const toForm = (p) => ({
 });
 
 const inputCls =
-    'w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-[#c6f500] transition';
+    'w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#c6f500] transition';
 
 function Field({ label, children, className = '' }) {
     return (
         <div className={className}>
-            <label className="block font-bold text-zinc-300 uppercase mb-1">{label}</label>
+            <label className="block font-bold text-slate-700 uppercase mb-1">{label}</label>
             {children}
         </div>
     );
@@ -205,26 +205,26 @@ export default function ProductForm({
 
     return (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="bg-slate-50 border border-slate-300 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10">
-                    <h3 className="font-black text-sm uppercase text-white">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
+                    <h3 className="font-black text-sm uppercase text-slate-900">
                         {isAdd ? '➕ Thêm Sản Phẩm Mới' : '✏️ Sửa Sản Phẩm'}
                     </h3>
-                    <button onClick={onClose} className="text-zinc-400 hover:text-white font-bold text-lg">✕</button>
+                    <button onClick={onClose} className="text-slate-500 hover:text-slate-900 font-bold text-lg">✕</button>
                 </div>
 
                 {/* Body */}
                 <div className="p-6 space-y-4 text-xs">
                     {notice && (
-                        <div className="p-3 rounded-xl bg-[#c6f500]/10 border border-[#c6f500]/30 text-[#c6f500] flex items-center gap-2">
+                        <div className="p-3 rounded-xl bg-[#c6f500]/10 border border-[#c6f500]/30 text-lime-700 flex items-center gap-2">
                             <span className="flex-1">{notice}</span>
-                            <button onClick={() => setNotice('')} className="font-bold hover:text-white">✕</button>
+                            <button onClick={() => setNotice('')} className="font-bold hover:text-slate-900">✕</button>
                         </div>
                     )}
                     {error && (
-                        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 flex items-center gap-2">
+                        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 flex items-center gap-2">
                             <span>⚠️</span><span className="whitespace-pre-line">{error}</span>
                         </div>
                     )}
@@ -258,14 +258,14 @@ export default function ProductForm({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <Field label="Giá bán mặc định (₫) *">
                             <input type="number" min="0" value={form.giaBan} onChange={setField('giaBan')}
-                                   placeholder="2890000" className={`${inputCls} !text-[#c6f500]`} />
+                                   placeholder="2890000" className={`${inputCls} !text-lime-700`} />
                         </Field>
                         <Field label="Giá gốc mặc định (₫)">
                             <input type="number" min="0" value={form.giaGoc} onChange={setField('giaGoc')}
                                    placeholder="3400000" className={inputCls} />
                         </Field>
                     </div>
-                    <p className="text-[10px] text-zinc-500 -mt-2">
+                    <p className="text-[10px] text-slate-500 -mt-2">
                         Biến thể để trống giá sẽ dùng hai giá này. Giá nhập nhập ở từng biến thể.
                     </p>
 
@@ -278,7 +278,7 @@ export default function ProductForm({
 
                 {/* Ảnh + biến thể */}
                 {isAdd ? (
-                    <div className="border-t border-zinc-800 pt-5">
+                    <div className="border-t border-slate-200 pt-5">
                         <StagedImages
                             images={stagedImages} setImages={setStagedImages}
                             mainId={stagedMainId} setMainId={setStagedMainId}
@@ -289,7 +289,7 @@ export default function ProductForm({
                         />
                     </div>
                 ) : (
-                    <div className="border-t border-zinc-800 pt-5">
+                    <div className="border-t border-slate-200 pt-5">
                         <ProductImages
                             productId={productId}
                             fallbackSrc={current.urlAnh || ''}
@@ -309,9 +309,9 @@ export default function ProductForm({
                 )}
 
                 {/* Footer */}
-                <div className="px-6 pb-6 flex gap-3 justify-end border-t border-zinc-800 pt-4">
+                <div className="px-6 pb-6 flex gap-3 justify-end border-t border-slate-200 pt-4">
                     <button onClick={onClose} disabled={saving}
-                            className="px-5 py-2.5 bg-zinc-800 text-zinc-300 font-bold text-xs rounded-xl hover:bg-zinc-700 transition">
+                            className="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-200 transition">
                         {isAdd ? 'Hủy' : 'Đóng'}
                     </button>
                     <button onClick={handleSave} disabled={saving}
