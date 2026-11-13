@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { INITIAL_PRODUCTS, INITIAL_ORDERS } from '../data/mockData';
 import { useAuthStore } from '../store';
-import { sanPhamApi } from '../api';
-import ProductDetail from './ProductDetail';
+import axiosClient from '../api/axiosClient';
 import AdminProduct from "./AdminProduct.jsx";
 import AdminAttribute from "./AdminAttribute.jsx";
 import KhachHangPage from "./KhachHangPage.jsx";
 import NhanVienPage from "./NhanVienPage.jsx";
+import BanHangTaiKho from "./BanHangTaiKho.jsx";
+import BillK80Modal from "./BillK80Modal.jsx";
+
+const fmtMoney = (v) => Number(v ?? 0).toLocaleString('vi-VN') + '₫';
 
 export default function AdminPos({ session: propSession, onLogout: propLogout }) {
   const navigate = useNavigate();
@@ -29,78 +31,53 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
   // Dashboard Metrics & Filter State
   const [statsPeriod, setStatsPeriod] = useState('7days'); // 'today' | '7days' | 'month' | 'year'
 
-  // POS State
-  const [activeBillTab, setActiveBillTab] = useState(1);
-  const [bill1, setBill1] = useState([
-    { product: INITIAL_PRODUCTS[0], size: '42', color: 'Xám Khói', qty: 1, unitPrice: INITIAL_PRODUCTS[0].price }
-  ]);
-  const [bill2, setBill2] = useState([]);
-  const [posSearch, setPosSearch] = useState('');
-  const [billDiscount, setBillDiscount] = useState(0);
+  // ── Dashboard: thống kê thật từ /ban-hang/thong-ke ──────────────────────
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  useEffect(() => {
+    if (!isAdmin || activeTab !== 'dashboard') return;
+    let alive = true;
+    setStatsLoading(true);
+    axiosClient.get('/ban-hang/thong-ke', { params: { period: statsPeriod } })
+      .then((res) => { if (alive) setStats(res); })
+      .catch(() => {})
+      .finally(() => { if (alive) setStatsLoading(false); });
+    return () => { alive = false; };
+  }, [isAdmin, activeTab, statsPeriod]);
 
-  // Shift state
-  const [openingCash, setOpeningCash] = useState(2000000);
-  const [actualCash, setActualCash] = useState(5350000);
-  const [shiftNote, setShiftNote] = useState('');
-
-  // Orders state
-  const [orderFilter, setOrderFilter] = useState('all');
-
-  const currentBill = activeBillTab === 1 ? bill1 : bill2;
-  const setCurrentBill = activeBillTab === 1 ? setBill1 : setBill2;
-
-  const billSubtotal = currentBill.reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
-  const billTotal = Math.max(0, billSubtotal - billDiscount);
-
-  const handleAddPosProduct = (prod) => {
-    setCurrentBill((prev) => {
-      const existing = prev.find((x) => x.product.id === prod.id);
-      if (existing) {
-        return prev.map((x) => (x.product.id === prod.id ? { ...x, qty: x.qty + 1 } : x));
-      }
-      return [...prev, { product: prod, size: prod.sizes[1] || '42', color: prod.colors[0], qty: 1, unitPrice: prod.price }];
-    });
-  };
-
-  const handleRemovePosItem = (idx) => {
-    setCurrentBill((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleUpdatePosQty = (idx, delta) => {
-    setCurrentBill((prev) => {
-      const updated = [...prev];
-      const newQty = updated[idx].qty + delta;
-      if (newQty <= 0) updated.splice(idx, 1);
-      else updated[idx].qty = newQty;
-      return updated;
-    });
-  };
-
-  const handlePosCheckout = () => {
-    if (currentBill.length === 0) {
-      alert("Hóa đơn trống!");
-      return;
-    }
-    alert(`✅ THANH TOÁN THÀNH CÔNG HÓA ĐƠN #${activeBillTab}\nTổng tiền: ${billTotal.toLocaleString('vi-VN')}₫\nĐã trừ tồn kho và in bill nhiệt K80.`);
-    setCurrentBill([]);
-    setBillDiscount(0);
-  };
-
-  const filteredOrders = INITIAL_ORDERS.filter((o) => {
-    if (orderFilter === 'all') return true;
-    return o.status === orderFilter;
+  // Chiều cao cột biểu đồ theo doanh thu (peak = 100%)
+  const weeklyRevenue = (stats?.bieuDo7Ngay || []).map((d) => {
+    const peak = Number(stats?.bieuDo7NgayPeak || 0);
+    const v = Number(d.doanhThu || 0);
+    return {
+      day: d.thu,
+      value: v,
+      height: peak > 0 ? `${Math.max(4, Math.round((v / peak) * 100))}%` : '4%',
+      isPeak: peak > 0 && v === peak,
+    };
   });
 
-  // Mock Weekly Revenue Chart Data
-  const weeklyRevenue = [
-    { day: "Thứ 2", value: 4850000, height: "45%" },
-    { day: "Thứ 3", value: 6200000, height: "58%" },
-    { day: "Thứ 4", value: 5100000, height: "48%" },
-    { day: "Thứ 5", value: 7900000, height: "74%" },
-    { day: "Thứ 6", value: 9450000, height: "88%" },
-    { day: "Thứ 7", value: 12800000, height: "100%", isPeak: true },
-    { day: "Chủ Nhật", value: 10550000, height: "82%" }
-  ];
+  // ── Orders: hóa đơn thật từ /ban-hang/hoa-don (tab Quản Lý Hóa Đơn) ──────
+  const [orders, setOrders] = useState([]);
+  useEffect(() => {
+    if (activeTab !== 'orders') return;
+    axiosClient.get('/ban-hang/hoa-don')
+      .then((res) => setOrders(Array.isArray(res) ? res : res.content || []))
+      .catch(() => setOrders([]));
+  }, [activeTab]);
+  const [orderFilter, setOrderFilter] = useState('all');
+  const [bill, setBill] = useState(null); // bill đang in lại (modal K80)
+  const filteredOrders = orders.filter((o) => {
+    if (orderFilter === 'all') return true;
+    if (orderFilter === 'pos') return o.trangThai === 3;
+    if (orderFilter === 'completed') return o.trangThai === 3 || o.trangThai === 2;
+    return o.trangThai !== 3; // đơn online
+  });
+
+  // ── Shift state (chốt két — dữ liệu local, chưa có bảng ca làm việc) ────
+  const [openingCash, setOpeningCash] = useState(0);
+  const [actualCash, setActualCash] = useState(0);
+  const [shiftNote, setShiftNote] = useState('');
 
   return (
     <div className="bg-black text-slate-100 min-h-screen flex flex-col selection:bg-[#c6f500] selection:text-black">
@@ -138,7 +115,7 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
 
           <div className="flex items-center space-x-1.5 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5 font-bold">
             <span className="text-[#c6f500]">●</span>
-            <span className="text-white">{session?.name || 'Vũ Minh Đức (Admin)'}</span>
+            <span className="text-white">{session?.hoTen || session?.name || 'Thu ngân'}</span>
           </div>
 
           <button onClick={handleLogout} className="text-zinc-400 hover:text-red-400 font-bold px-2 py-1 transition">
@@ -281,7 +258,7 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
                     <span className="text-[#c6f500]">📊</span>
                     <span>Dashboard Thống Kê & Báo Cáo Doanh Thu</span>
                   </h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">Tổng quan kết quả kinh doanh đa kênh (Website Online + Bán lẻ tại quầy POS).</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">Số liệu thật từ hóa đơn đã thanh toán (POS + Online).</p>
                 </div>
 
                 {/* Period Selector Pills */}
@@ -290,7 +267,7 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
                     { id: 'today', label: 'Hôm nay' },
                     { id: '7days', label: '7 ngày qua' },
                     { id: 'month', label: 'Tháng này' },
-                    { id: 'year', label: 'Năm 2026' }
+                    { id: 'year', label: 'Năm ' + new Date().getFullYear() }
                   ].map((p) => (
                     <button
                       key={p.id}
@@ -313,54 +290,65 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
                 <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-2">
                   <div className="flex justify-between items-center text-xs text-zinc-400">
                     <span>Tổng Doanh Thu</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#c6f500]/15 text-[#c6f500]">+18.4%</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      (stats?.kpi?.tangTruongDoanhThu ?? 0) >= 0 ? 'bg-[#c6f500]/15 text-[#c6f500]' : 'bg-red-400/15 text-red-400'
+                    }`}>
+                      {stats ? `${stats.kpi.tangTruongDoanhThu >= 0 ? '+' : ''}${stats.kpi.tangTruongDoanhThu}%` : '—'}
+                    </span>
                   </div>
-                  <div className="text-2xl font-black text-white">48.850.000₫</div>
-                  <div className="text-[11px] text-zinc-500">So với kỳ trước (41.250.000₫)</div>
+                  <div className="text-2xl font-black text-white">{stats ? fmtMoney(stats.kpi.tongDoanhThu) : '...'}</div>
+                  <div className="text-[11px] text-zinc-500">So với kỳ trước ({stats ? fmtMoney(stats.kpi.doanhThuKyTruoc) : '...'})</div>
                 </div>
 
                 <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-2">
                   <div className="flex justify-between items-center text-xs text-zinc-400">
                     <span>Tổng Đơn Hàng</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#c6f500]/15 text-[#c6f500]">+12.5%</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      (stats?.kpi?.tangTruongDonHang ?? 0) >= 0 ? 'bg-[#c6f500]/15 text-[#c6f500]' : 'bg-red-400/15 text-red-400'
+                    }`}>
+                      {stats ? `${stats.kpi.tangTruongDonHang >= 0 ? '+' : ''}${stats.kpi.tangTruongDonHang}%` : '—'}
+                    </span>
                   </div>
-                  <div className="text-2xl font-black text-white">38 đơn</div>
-                  <div className="text-[11px] text-zinc-500">Online: <b>24 đơn</b> • POS: <b>14 đơn</b></div>
+                  <div className="text-2xl font-black text-white">{stats ? `${stats.kpi.tongDonHang} đơn` : '...'}</div>
+                  <div className="text-[11px] text-zinc-500">POS: <b>{stats ? fmtMoney(stats.kenhBanHang.posDoanhThu) : '...'}</b> • Online: <b>{stats ? fmtMoney(stats.kenhBanHang.onlineDoanhThu) : '...'}</b></div>
                 </div>
 
                 <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-2">
                   <div className="flex justify-between items-center text-xs text-zinc-400">
                     <span>Giá Trị Trung Bình Đơn (AOV)</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#c6f500]/15 text-[#c6f500]">+5.2%</span>
                   </div>
-                  <div className="text-2xl font-black text-[#c6f500]">1.285.000₫</div>
-                  <div className="text-[11px] text-zinc-500">Tỷ lệ chuyển đổi đạt 3.8%</div>
+                  <div className="text-2xl font-black text-[#c6f500]">{stats ? fmtMoney(stats.kpi.aov) : '...'}</div>
+                  <div className="text-[11px] text-zinc-500">Kỳ: {stats?.period || '—'}</div>
                 </div>
 
                 <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-2">
                   <div className="flex justify-between items-center text-xs text-zinc-400">
                     <span>Số Đôi Giày Xuất Kho</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-400/15 text-blue-400">Tồn: 186</span>
                   </div>
-                  <div className="text-2xl font-black text-white">46 đôi</div>
-                  <div className="text-[11px] text-zinc-500">Trả hàng/Đổi size: <b>2 đôi (4.3%)</b></div>
+                  <div className="text-2xl font-black text-white">{stats ? `${stats.kpi.soDoiXuatKho} đôi` : '...'}</div>
+                  <div className="text-[11px] text-zinc-500">Sản phẩm tồn thấp: <b>{stats ? stats.tonKhoThap.length : 0}</b></div>
                 </div>
               </div>
 
-              {/* CHARTS ROW (BIỂU ĐỒ DOANH THU 7 NGÀY & TỶ TRỌNG KÊNH BÁN) */}
+              {/* CHARTS ROW */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* 7-DAY REVENUE BAR CHART (2 COLS) */}
                 <div className="lg:col-span-2 bg-zinc-950 border border-zinc-800 rounded-3xl p-5 sm:p-6 space-y-4">
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-black text-sm uppercase text-white">Biểu Đồ Doanh Thu 7 Ngày Gần Nhất</h3>
-                      <p className="text-[11px] text-zinc-400">Doanh số tăng mạnh vào cuối tuần (Thứ 7 & Chủ Nhật).</p>
+                      <p className="text-[11px] text-zinc-400">Tổng doanh thu cả POS lẫn Online theo ngày.</p>
                     </div>
-                    <span className="text-xs font-bold text-[#c6f500]">Đỉnh điểm: 12.8M (Thứ 7)</span>
+                    <span className="text-xs font-bold text-[#c6f500]">
+                      {stats ? `Đỉnh điểm: ${(Number(stats.bieuDo7NgayPeak || 0) / 1000000).toFixed(1)}M` : '—'}
+                    </span>
                   </div>
 
                   {/* Visual Bar Chart */}
                   <div className="h-48 flex items-end justify-between gap-3 pt-6 border-b border-zinc-800 pb-2">
+                    {weeklyRevenue.length === 0 && (
+                      <div className="w-full text-center text-zinc-500 text-xs pb-4">Chưa có dữ liệu doanh thu</div>
+                    )}
                     {weeklyRevenue.map((item, idx) => (
                       <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group">
                         <div className="text-[10px] text-zinc-400 opacity-0 group-hover:opacity-100 transition font-mono mb-1">
@@ -380,18 +368,14 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
                   </div>
 
                   {/* Sub breakdown info */}
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
+                  <div className="grid grid-cols-2 gap-2 text-center text-xs pt-1">
                     <div className="bg-zinc-900/60 p-2 rounded-xl">
                       <span className="text-zinc-500 text-[10px] block">Doanh Thu TB / Ngày</span>
-                      <b className="text-white">6.970.000₫</b>
+                      <b className="text-white">{stats ? fmtMoney(stats.doanhThuTB7Ngay) : '...'}</b>
                     </div>
                     <div className="bg-zinc-900/60 p-2 rounded-xl">
-                      <span className="text-zinc-500 text-[10px] block">Tỷ Lệ Hoàn Tất Đơn</span>
-                      <b className="text-[#c6f500]">94.8%</b>
-                    </div>
-                    <div className="bg-zinc-900/60 p-2 rounded-xl">
-                      <span className="text-zinc-500 text-[10px] block">Tỷ Lệ Hủy Đơn</span>
-                      <b className="text-red-400">5.2%</b>
+                      <span className="text-zinc-500 text-[10px] block">Số Đôi Xuất Kho Trong Kỳ</span>
+                      <b className="text-[#c6f500]">{stats ? `${stats.kpi.soDoiXuatKho} đôi` : '...'}</b>
                     </div>
                   </div>
                 </div>
@@ -406,21 +390,25 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
                     <div className="space-y-3">
                       <div>
                         <div className="flex justify-between text-xs font-bold mb-1">
-                          <span className="text-zinc-300">🌐 Online Website (160Store)</span>
-                          <span className="text-[#c6f500]">58% (28.3M)</span>
+                          <span className="text-zinc-300">🌐 Online Website</span>
+                          <span className="text-[#c6f500]">
+                            {stats ? `${stats.kenhBanHang.onlinePhanTram}% (${(Number(stats.kenhBanHang.onlineDoanhThu) / 1000000).toFixed(1)}M)` : '—'}
+                          </span>
                         </div>
                         <div className="w-full h-2.5 bg-zinc-900 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#c6f500] rounded-full" style={{ width: '58%' }}></div>
+                          <div className="h-full bg-[#c6f500] rounded-full" style={{ width: `${stats?.kenhBanHang.onlinePhanTram || 0}%` }}></div>
                         </div>
                       </div>
 
                       <div>
                         <div className="flex justify-between text-xs font-bold mb-1">
                           <span className="text-zinc-300">💵 Bán Lẻ Tại Quầy POS</span>
-                          <span className="text-white">42% (20.5M)</span>
+                          <span className="text-white">
+                            {stats ? `${stats.kenhBanHang.posPhanTram}% (${(Number(stats.kenhBanHang.posDoanhThu) / 1000000).toFixed(1)}M)` : '—'}
+                          </span>
                         </div>
                         <div className="w-full h-2.5 bg-zinc-900 rounded-full overflow-hidden">
-                          <div className="h-full bg-white rounded-full" style={{ width: '42%' }}></div>
+                          <div className="h-full bg-white rounded-full" style={{ width: `${stats?.kenhBanHang.posPhanTram || 0}%` }}></div>
                         </div>
                       </div>
                     </div>
@@ -429,22 +417,15 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
                   <div className="border-t border-zinc-800 pt-4 space-y-2">
                     <h4 className="font-bold text-xs text-white">Phương Thức Thanh Toán</h4>
                     <div className="space-y-1.5 text-xs text-zinc-400">
-                      <div className="flex justify-between">
-                        <span>Quét mã VietQR:</span>
-                        <b className="text-white">55% (Tự động hạch toán)</b>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Tiền mặt tại két:</span>
-                        <b className="text-white">30%</b>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>COD khi giao:</span>
-                        <b className="text-white">10%</b>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Ví MoMo / VNPay:</span>
-                        <b className="text-white">5%</b>
-                      </div>
+                      {(stats?.phuongThucThanhToan || []).length === 0 && (
+                        <div className="text-zinc-500">Chưa có thanh toán nào trong kỳ</div>
+                      )}
+                      {(stats?.phuongThucThanhToan || []).map((pt) => (
+                        <div key={pt.maHinhThuc} className="flex justify-between">
+                          <span>{pt.maHinhThuc === 'TIEN_MAT' ? '💵' : '🏦'} {pt.tenHinhThuc}:</span>
+                          <b className="text-white">{pt.phanTram}% ({(Number(pt.soTien) / 1000).toFixed(0)}K)</b>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -459,24 +440,25 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
                     <span className="text-[10px] text-[#c6f500] font-bold">Xếp theo số lượng</span>
                   </div>
 
-                  <div className="divide-y divide-zinc-850 space-y-2 text-xs">
-                    {INITIAL_PRODUCTS.slice(0, 4).map((p, idx) => (
-                      <div key={p.id} className="pt-2 flex items-center justify-between">
+                  <div className="divide-y divide-zinc-800 space-y-2 text-xs">
+                    {(stats?.topBanChay || []).length === 0 && (
+                      <div className="py-6 text-center text-zinc-500">Chưa có đơn hàng nào trong kỳ này</div>
+                    )}
+                    {(stats?.topBanChay || []).map((p, idx) => (
+                      <div key={p.sanPhamId} className="pt-2 flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <span className={`w-5 h-5 rounded-full flex items-center justify-center font-black text-[10px] ${
                             idx === 0 ? 'bg-[#c6f500] text-black' : 'bg-zinc-800 text-zinc-300'
                           }`}>
                             {idx + 1}
                           </span>
-                          <img src={p.image} className="w-10 h-10 rounded-lg object-cover bg-zinc-900" />
                           <div>
-                            <div className="font-bold text-white line-clamp-1">{p.name}</div>
-                            <div className="text-[10px] text-zinc-500">{p.brand} • Đã bán {20 - idx * 4} đôi</div>
+                            <div className="font-bold text-white line-clamp-1">{p.tenSanPham}</div>
+                            <div className="text-[10px] text-zinc-500">Đã bán {p.daBan} đôi</div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-black text-[#c6f500]">{((20 - idx * 4) * p.price).toLocaleString('vi-VN')}₫</div>
-                          <div className="text-[10px] text-zinc-400">Tồn: <b>{p.stock}</b></div>
+                          <div className="font-black text-[#c6f500]">{fmtMoney(p.doanhThu)}</div>
                         </div>
                       </div>
                     ))}
@@ -490,150 +472,37 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
                       <span className="text-amber-400">⚠️</span>
                       <span>Cảnh Báo Tồn Kho Sắp Hết</span>
                     </h3>
-                    <span className="text-[10px] text-red-400 font-bold">&lt; 10 đôi</span>
+                    <span className="text-[10px] text-red-400 font-bold">&lt; {stats?.nguongTonThap || 10} đôi</span>
                   </div>
 
                   <div className="space-y-2.5 text-xs">
-                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center justify-between">
-                      <div>
-                        <div className="font-bold text-white">Adidas Yeezy Boost 350 V2 Onyx</div>
-                        <div className="text-[10px] text-red-300">Chỉ còn 8 đôi trong kho (Size 42 hết hàng)</div>
+                    {(stats?.tonKhoThap || []).length === 0 && (
+                      <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400">
+                        Tồn kho ổn định — không có sản phẩm dưới ngưỡng.
                       </div>
-                      <button onClick={() => alert("Đã tạo phiếu nhập kho 20 đôi Yeezy 350!")} className="px-3 py-1 bg-red-500 text-white font-bold text-[10px] rounded-lg">
-                        Tạo Đơn Nhập
-                      </button>
-                    </div>
-
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-between">
-                      <div>
-                        <div className="font-bold text-white">New Balance 550 White Green Vintage</div>
-                        <div className="text-[10px] text-amber-300">Còn 19 đôi trong kho (Size 39, 43 sắp hết)</div>
-                      </div>
-                      <button onClick={() => alert("Đã tạo phiếu nhập kho NB 550!")} className="px-3 py-1 bg-amber-500 text-black font-bold text-[10px] rounded-lg">
-                        Tạo Đơn Nhập
-                      </button>
-                    </div>
-
-                    <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-between">
-                      <div>
-                        <div className="font-bold text-white">Nike Air Jordan 1 Retro High Shadow</div>
-                        <div className="text-[10px] text-zinc-400">Còn 24 đôi (Tồn kho ổn định)</div>
-                      </div>
-                      <span className="text-[10px] text-[#c6f500] font-bold">Đủ hàng</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 1: POS SCREEN */}
-          {activeTab === 'pos' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-              <div className="lg:col-span-2 space-y-4">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="[F2/F3] Tìm tên giày, mã SKU hoặc quét Barcode..."
-                    value={posSearch}
-                    onChange={(e) => setPosSearch(e.target.value)}
-                    className="flex-1 bg-zinc-950 border border-zinc-800 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-[#c6f500]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {INITIAL_PRODUCTS.filter((p) => !posSearch || p.name.toLowerCase().includes(posSearch.toLowerCase()) || p.barcode.includes(posSearch)).map((p) => (
-                    <div
-                      key={p.id}
-                      onClick={() => handleAddPosProduct(p)}
-                      className="bg-zinc-950 border border-zinc-800 hover:border-[#c6f500] rounded-2xl p-2.5 cursor-pointer transition flex flex-col justify-between"
-                    >
-                      <img src={p.image} className="w-full aspect-square rounded-xl object-cover bg-zinc-900 mb-2" />
-                      <div>
-                        <div className="text-[10px] text-zinc-500 font-mono">{p.barcode}</div>
-                        <h4 className="font-bold text-xs text-white line-clamp-1">{p.name}</h4>
-                        <div className="flex justify-between items-center mt-1">
-                          <span className="font-black text-xs text-[#c6f500]">{p.price.toLocaleString('vi-VN')}₫</span>
-                          <span className="text-[10px] text-zinc-400">Tồn: {p.stock}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* POS Bill Panel */}
-              <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 flex flex-col justify-between h-fit lg:h-full">
-                <div>
-                  <div className="flex gap-2 border-b border-zinc-800 pb-3 mb-3">
-                    <button
-                      onClick={() => setActiveBillTab(1)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${activeBillTab === 1 ? 'bg-[#c6f500] text-black' : 'bg-zinc-900 text-zinc-400'}`}
-                    >
-                      Hóa Đơn 1 ({bill1.length})
-                    </button>
-                    <button
-                      onClick={() => setActiveBillTab(2)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${activeBillTab === 2 ? 'bg-[#c6f500] text-black' : 'bg-zinc-900 text-zinc-400'}`}
-                    >
-                      Hóa Đơn 2 ({bill2.length})
-                    </button>
-                  </div>
-
-                  <div className="space-y-2 max-h-[40vh] overflow-y-auto">
-                    {currentBill.length === 0 ? (
-                      <div className="py-8 text-center text-zinc-500 text-xs">Hóa đơn đang trống. Click giày bên trái để thêm!</div>
-                    ) : (
-                      currentBill.map((item, idx) => (
-                        <div key={idx} className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800 text-xs space-y-1">
-                          <div className="flex justify-between">
-                            <span className="font-bold text-white line-clamp-1">{item.product.name}</span>
-                            <button onClick={() => handleRemovePosItem(idx)} className="text-zinc-500 hover:text-red-400 font-bold ml-2">✕</button>
-                          </div>
-                          <div className="flex justify-between text-zinc-400 text-[11px]">
-                            <span>Size: {item.size} • {item.color}</span>
-                            <span className="font-bold text-[#c6f500]">{(item.unitPrice * item.qty).toLocaleString('vi-VN')}₫</span>
-                          </div>
-                          <div className="flex items-center space-x-2 pt-1">
-                            <button onClick={() => handleUpdatePosQty(idx, -1)} className="w-5 h-5 bg-black rounded text-white">-</button>
-                            <span className="font-bold">{item.qty}</span>
-                            <button onClick={() => handleUpdatePosQty(idx, 1)} className="w-5 h-5 bg-black rounded text-white">+</button>
-                          </div>
-                        </div>
-                      ))
                     )}
+                    {(stats?.tonKhoThap || []).map((sp) => (
+                      <div key={sp.sanPhamId} className={`p-3 rounded-xl flex items-center justify-between ${
+                        sp.tonKho === 0 ? 'bg-red-500/10 border border-red-500/30' : 'bg-amber-500/10 border border-amber-500/30'
+                      }`}>
+                        <div>
+                          <div className="font-bold text-white line-clamp-1">{sp.tenSanPham}</div>
+                          <div className={`text-[10px] ${sp.tonKho === 0 ? 'text-red-300' : 'text-amber-300'}`}>
+                            {sp.tonKho === 0
+                              ? `Hết hàng toàn bộ (${sp.sizeHetHang} size)`
+                              : `Chỉ còn ${sp.tonKho} đôi trong kho${sp.sizeHetHang > 0 ? ` (${sp.sizeHetHang} size hết)` : ''}`}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-
-                <div className="border-t border-zinc-800 pt-4 space-y-3 mt-4">
-                  <div className="text-xs space-y-1.5">
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Tạm tính hàng:</span>
-                      <span>{billSubtotal.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                    <div className="flex justify-between items-center text-zinc-400">
-                      <span>Giảm giá / Voucher:</span>
-                      <input
-                        type="number"
-                        placeholder="0₫"
-                        value={billDiscount || ''}
-                        onChange={(e) => setBillDiscount(Number(e.target.value))}
-                        className="w-24 bg-black border border-zinc-800 rounded px-2 py-0.5 text-right text-xs text-[#c6f500]"
-                      />
-                    </div>
-                    <div className="flex justify-between text-base font-black text-white pt-2 border-t border-zinc-800">
-                      <span>Khách Cần Trả:</span>
-                      <span className="text-[#c6f500]">{billTotal.toLocaleString('vi-VN')}₫</span>
-                    </div>
-                  </div>
-
-                  <button onClick={handlePosCheckout} className="w-full py-3.5 bg-[#c6f500] hover:bg-[#b0dc00] text-black font-black uppercase text-xs rounded-xl shadow-lg transition">
-                    [F9] Thanh Toán & In Bill K80
-                  </button>
                 </div>
               </div>
             </div>
           )}
+
+          {/* TAB 1: POS SCREEN — Bán hàng tại kho */}
+          {activeTab === 'pos' && <BanHangTaiKho session={session} />}
 
           {/* TAB 2: PRODUCTS */}
           {activeTab === 'products' && (<AdminProduct activeTab={activeTab} isAdmin={isAdmin}/>
@@ -650,9 +519,8 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
               <div className="flex flex-wrap gap-2">
                 {[
                   { id: 'all', label: 'Tất cả hóa đơn' },
-                  { id: 'pending', label: 'Đơn Online: Chưa xử lý' },
-                  { id: 'processing', label: 'Đơn Online: Đang chuẩn bị' },
                   { id: 'pos', label: 'Hóa Đơn Tại Quầy POS' },
+                  { id: 'online', label: 'Đơn Online' },
                   { id: 'completed', label: 'Đã hoàn thành' }
                 ].map((tab) => (
                   <button
@@ -673,29 +541,45 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
                     <tr>
                       <th className="p-3">Mã Hóa Đơn</th>
                       <th className="p-3">Kênh</th>
-                      <th className="p-3">Khách Hàng</th>
+                      <th className="p-3">Thanh Toán</th>
                       <th className="p-3">Sản Phẩm</th>
                       <th className="p-3 text-right">Tổng Tiền</th>
                       <th className="p-3 text-center">Trạng Thái</th>
+                      <th className="p-3 text-center">Bill</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800/60">
+                    {orders.length === 0 && (
+                      <tr><td colSpan={7} className="p-8 text-center text-zinc-500">Chưa có hóa đơn nào</td></tr>
+                    )}
                     {filteredOrders.map((ord) => (
                       <tr key={ord.id} className="hover:bg-zinc-900/40">
-                        <td className="p-3 font-mono font-bold text-[#c6f500]">#{ord.id}</td>
-                        <td className="p-3 text-zinc-300">{ord.channel}</td>
                         <td className="p-3">
-                          <div className="font-bold text-white">{ord.customer}</div>
-                          <div className="text-[10px] text-zinc-500">{ord.phone}</div>
+                          <div className="font-mono font-bold text-[#c6f500]">#{ord.maHoaDon}</div>
+                          <div className="text-[10px] text-zinc-500">{ord.ngayTao ? new Date(ord.ngayTao).toLocaleString('vi-VN') : ''}</div>
+                        </td>
+                        <td className="p-3 text-zinc-300">{ord.trangThai === 3 ? 'Tại quầy POS' : 'Online'}</td>
+                        <td className="p-3">
+                          {ord.maPhuongThuc
+                            ? <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${ord.maPhuongThuc === 'TIEN_MAT' ? 'bg-amber-400/15 text-amber-400' : 'bg-blue-400/15 text-blue-400'}`}>
+                                {ord.phuongThuc}
+                              </span>
+                            : <span className="text-zinc-500">—</span>}
                         </td>
                         <td className="p-3 text-zinc-300">{ord.itemsSummary}</td>
-                        <td className="p-3 text-right font-black text-white">{ord.total.toLocaleString('vi-VN')}₫</td>
+                        <td className="p-3 text-right font-black text-white">{Number(ord.thanhTien || 0).toLocaleString('vi-VN')}₫</td>
                         <td className="p-3 text-center">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            ord.status === 'pos' ? 'bg-[#c6f500]/15 text-[#c6f500]' : (ord.status === 'pending' ? 'bg-amber-400/15 text-amber-400' : 'bg-blue-400/15 text-blue-400')
-                          }`}>
-                            {ord.status === 'pos' ? 'Đã Thanh Toán' : (ord.status === 'pending' ? 'Chờ Đóng Hàng' : 'Đang Xử Lý')}
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#c6f500]/15 text-[#c6f500]">
+                            Đã Thanh Toán
                           </span>
+                        </td>
+                        <td className="p-3 text-center">
+                          <button
+                            onClick={() => axiosClient.get(`/ban-hang/hoa-don/${ord.id}/bill`).then(setBill).catch((e) => alert(e.message || 'Không tải được bill!'))}
+                            className="px-2 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-[10px] font-bold text-zinc-300 hover:text-white transition"
+                          >
+                            🖨️ In lại
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -765,7 +649,7 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
               <h3 className="font-black text-sm uppercase text-white">Quy Trình Đổi Size / Đổi Trả Hàng (7 Ngày)</h3>
               <p className="text-zinc-400">Nhập mã hóa đơn cũ để kiểm tra điều kiện đổi size hoặc đổi mẫu mới:</p>
               <div className="flex gap-2 max-w-md">
-                <input type="text" placeholder="Nhập mã đơn: #ORD-9821 hoặc #POS-1042..." className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-white" />
+                <input type="text" placeholder="Nhập mã đơn: #POS260103..." className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-white" />
                 <button onClick={() => alert("Đơn hàng hợp lệ! Đã mua cách đây 2 ngày. Đủ điều kiện đổi size miễn phí.")} className="px-4 py-2 bg-[#c6f500] text-black font-bold rounded-xl">
                   Kiểm Tra
                 </button>
@@ -780,16 +664,19 @@ export default function AdminPos({ session: propSession, onLogout: propLogout })
               <div className="h-48 bg-zinc-900 rounded-2xl p-4 overflow-y-auto space-y-2">
                 <div className="text-zinc-400 text-[10px]">Hôm nay 14:10</div>
                 <div className="bg-zinc-800 p-2.5 rounded-xl max-w-xs text-white">
-                  <b>Khách:</b> Shop còn Nike Jordan Shadow size 42 ở chi nhánh Phố Huế không ạ?
+                  <b>Khách:</b> Shop còn Nike size 42 không ạ?
                 </div>
                 <div className="bg-[#c6f500] text-black p-2.5 rounded-xl max-w-xs ml-auto font-medium">
-                  <b>Thu ngân:</b> Dạ chào bạn, size 42 hiện chi nhánh Hoàn Kiếm còn sẵn 3 đôi bạn nhé!
+                  <b>Thu ngân:</b> Dạ chào bạn, size 42 hiện còn sẵn 3 đôi bạn nhé!
                 </div>
               </div>
             </div>
           )}
         </main>
       </div>
+
+      {/* ── MODAL: BILL K80 — in lại hóa đơn ── */}
+      <BillK80Modal bill={bill} session={session} onClose={() => setBill(null)} />
     </div>
   );
 }
